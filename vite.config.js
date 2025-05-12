@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+// 设置别名，代替src
+import path from 'path'
 
 //element-plus 按需导入
 import AutoImport from 'unplugin-auto-import/vite'
@@ -17,4 +19,9 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
     }),
   ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
 })
