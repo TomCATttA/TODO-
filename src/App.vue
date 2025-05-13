@@ -21,9 +21,9 @@
 }
 
   .body{
-    width: 1200px;
-    height: 650px;
-    background: yellow;
+    width: 1300px;
+    height:700px;
+    background: rgba(240, 239, 239, 0.815);
     border-radius: 10px;
   }
 </style>
