@@ -1,7 +1,5 @@
 <script setup>
-  
 </script>
-
 <template>
 <div class="app-container">
 <div class="body">
@@ -9,7 +7,6 @@
 </div>
   </div>
 </template>
-
 <style scoped lang="scss">
 .app-container {
   display: flex;
@@ -19,8 +16,7 @@
   margin: 0;
   padding: 0;
 }
-
-  .body{
+.body{
     width: 1300px;
     height:700px;
     background: rgba(240, 239, 239, 0.815);

@@ -1,6 +1,6 @@
 <script setup>
 import NavList from "./components/NavList.vue"
-</script>
+</script> 
 
 <template>
     <nav-list></nav-list>

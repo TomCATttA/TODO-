@@ -1,20 +1,33 @@
 /* 全局或组件内（无 scoped）*/
 .icon-taiyang {
-  color: #ffdeae; /* 橙色 - 太阳 */
+  color: #ffdeae; /* 每一天 */
 }
 
 .icon-shoucang {
-  color: #fc7474; /* 红色 - 收藏 */
+  color: #fc7474; /* 重要 */
 }
 
 .icon-jihua {
-  color: #94d4ff; /* 蓝色 - 计划 */
+  color: #94d4ff; /* 计划内 */
 }
 
 .icon-yifenpei {
-  color: #00a552; /* 绿色 - 已分配 */
+  color: #00a552; /* 已分配 */
 }
 
 .icon-home {
-  color: #dcbaff; /* 紫色 - 首页 */
+  color: #dcbaff; /* 任务 */
+}
+.icon-liebiao-zu{
+  color: #b9b9b9;/* 左侧组 */
+}
+.icon-liebiao{
+  color: #b9b9b9;/* 左侧列表 */
+}
+
+.icon-quxiao{
+  color: #b9b9b9;/* 取消 */
+}
+.icon-zhongmingming{
+  color: #b9b9b9;/* 重命名 */
 }
