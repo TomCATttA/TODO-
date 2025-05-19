@@ -1,52 +1,61 @@
 <script setup>
-import { ref, nextTick } from "vue";
+import { ref, nextTick ,reactive} from "vue";
 import { useListStore } from "@/stores/listStore";
+import draggable from "vuedraggable";
 //导入列表业务
 import { useList } from "./composable/useList";
 // 使用列表相关的 composable
-const { listName, inputRef1, isShowAddList, openList, addList,delList} = useList();
+const { listName, inputRef1, isShowAddList, openList, addList, delList } =
+  useList();
 //导入组业务
 import { useGroup } from "./composable/useGroup";
 // 使用组相关的 composable
-const { groupName, inputRef2, isShowAddGroup, openGroup, addGroup} = useGroup();
+const {
+  groupName,
+  inputRef2,
+  isShowAddGroup,
+  openGroup,
+  addGroup,
+  cancelGroup,
+} = useGroup();
 const listStore = useListStore();
 const search = ref("");
-const isEdit = ref(null)
+const isEdit = ref(null);
 const changeName = ref("");
-const rename = ref('')
+const rename = ref("");
+
 //重命名
 const openEdit = (id) => {
-  isEdit.value = id
-  changeName.value = listStore.getTitle(id)
+  isEdit.value = id;
+  changeName.value = listStore.getTitle(id);
   nextTick(() => {
- const inputEl = document.querySelector(`[data-ref="rename-${id}"]`);
+    const inputEl = document.querySelector(`[data-ref="rename-${id}"]`);
     if (inputEl) {
       inputEl.focus();
       inputEl.select();
     }
-  })
-}
+  });
+};
 const updateName = (id) => {
-if (changeName.value.trim()) { // 检查是否有输入内容
-    listStore.edit(id, changeName.value); 
+  if (changeName.value.trim()) {
+    // 检查是否有输入内容
+    listStore.edit(id, changeName.value);
   }
   isEdit.value = ""; // 重置编辑状态
   changeName.value = ""; // 清空输入
-}
-// //列表的重命名
-// const reListname = (id) => {
-  
-// };
-// //组的重命名
-// const reGroupname = (id) => {
-//   if (changeName.value.trim()) { // 检查是否有输入内容
-//     listStore.edit(id, changeName.value); 
-//   }
-//   isEdit.value = ""; // 重置编辑状态
-//   changeName.value = ""; // 清空输入
-// };
-</script>
+};
+const group = ref({
+  name: "groups", //分组名称groups的组之间可以相互拖拽
+  pull: true, //是否允许拖出当前组
+  put: true, //是否允许拖入当前组
+});
 
+const  onDragEnd = (evt)=> {
+  console.log(listStore.list)
+  console.log('拖拽结束', evt);
+  // 这里可以添加数据处理的逻辑
+}
+</script>
 <template>
   <div class="nav">
     <div class="nav-top">
@@ -74,26 +83,59 @@ if (changeName.value.trim()) { // 检查是否有输入内容
     </div>
     <div class="nav-bottom">
       <ul>
-        <li v-for="item in listStore.list" :key="item.id">
-          <i
-            :class="[
-              'iconfont',
-              item.type === '列表' ? 'icon-liebiao-zu' : 'icon-liebiao',
-            ]"
-          ></i>
-          <div class="info" v-show="isEdit !== item.id">
-          <p class="title">{{ item.title }}</p>
-          <i class="iconfont icon-zhongmingming" @click="openEdit(item.id)"> </i>
-          <i class="iconfont icon-quxiao" @click="item.type === '列表' ? delList(item.id) : cancelGroup"> </i>
-          </div>
-          <input
-           :data-ref="'rename-' + item.id"
-            v-show="isEdit === item.id"
-            type="text"
-            @blur="updateName(item.id)"
-            v-model="changeName"
-          />
-        </li>
+        <draggable
+          v-model="listStore.list"
+          item-key="id"
+          :group="group"
+          animation="1000"
+          @end="onDragEnd"
+        >
+          <template #item="{ element }">
+            <li :key="element.id">
+              <i
+                :class="[
+                  'iconfont',
+                  element.type === '列表' ? 'icon-liebiao-zu' : 'icon-liebiao',
+                ]"
+              ></i>
+              <div class="info" v-show="isEdit !== element.id">
+                <p class="title">{{ element.title }}</p>
+                <i
+                  class="iconfont icon-zhongmingming"
+                  @click="openEdit(element.id)"
+                >
+                </i>
+                <i
+                  class="iconfont icon-quxiao"
+                  @click="
+                    element.type === '列表'
+                      ? delList(element.id)
+                      : cancelGroup(element.id)
+                  "
+                >
+                </i>
+              </div>
+              <draggable
+                v-if="element.type === '组'"
+                v-model="element.childrenlist"
+                item-key="id"
+                :group="group"
+                animation="1000"
+              >
+              <template #item="{element:subElement}">
+                <div class="subItem" :key="subElement.id">{{subElement.title}}xxxx</div>
+              </template>
+              </draggable>
+              <input
+                :data-ref="'rename-' + element.id"
+                v-show="isEdit === element.id"
+                type="text"
+                @blur="updateName(element.id)"
+                v-model="changeName"
+              />
+            </li>
+          </template>
+        </draggable>
         <!-- 添加列表 -->
         <li v-show="isShowAddList">
           <i class="iconfont icon-liebiao-zu"></i
@@ -146,38 +188,43 @@ if (changeName.value.trim()) { // 检查是否有输入内容
       padding: 0;
       list-style: none;
       li {
-        height: 40px;
+        // height: 40px;
         padding-left: 10px;
         display: flex;
         align-items: center;
         transition: 0.3s linear;
         position: relative;
-        .info{
+       .subItem {
+      padding: 8px;
+      background: #e0e0e0;
+      margin: 5px 0 5px 10px;
+    }
+        .info {
           width: 170px;
           display: flex;
           align-items: center;
         }
-        input{
-           position: absolute;
-           left: 30px;
+        input {
+          position: absolute;
+          left: 30px;
         }
         .icon-zhongmingming,
-      .icon-quxiao {
-        opacity: 0; // 默认隐藏
-        transition: opacity 0.3s; // 添加过渡效果
-        &:hover{
-          color: #1f1f1f;
-        }
-      }
-        &:hover{
-          .icon-zhongmingming,
         .icon-quxiao {
-          opacity: 1; // 悬停时显示
+          opacity: 0; // 默认隐藏
+          transition: opacity 0.3s; // 添加过渡效果
+          &:hover {
+            color: #1f1f1f;
+          }
         }
-           background: #e3e3e3; 
-           cursor: pointer;
+        &:hover {
+          .icon-zhongmingming,
+          .icon-quxiao {
+            opacity: 1; // 悬停时显示
+          }
+          background: #e3e3e3;
+          cursor: pointer;
         }
-        p{
+        p {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;

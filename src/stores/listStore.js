@@ -17,8 +17,13 @@ export const useListStore = defineStore('list',()=>{
         list.value.splice(idx,1)
     }
     //取消组
-    const cancel = () => {
-        
+    const cancel = (id) => {
+        console.log('删除2')
+         const index = list.value.findIndex(item => item.id === id)
+        const item = list.value.find((item) => id === item.id)
+        if(!item.childrenlist){
+             list.value.splice(index, 1)
+        }
     }
     //根据id获取列表(组)名
     const getTitle = (id)=>{
@@ -41,6 +46,7 @@ export const useListStore = defineStore('list',()=>{
         del,
         add,
         edit,
-        getTitle 
+        getTitle,
+        cancel 
     }
 })

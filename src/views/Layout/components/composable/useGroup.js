@@ -1,5 +1,5 @@
 //封装左侧导航组数据的相关业务代码
-import { ref, nextTick } from "vue";
+import { ref, nextTick, reactive } from "vue";
 import { useListStore } from "@/stores/listStore";
 export function useGroup(){
      const listStore = useListStore();
@@ -20,11 +20,20 @@ const addGroup = () => {
         id: Date.now(),
         title: groupName.value || `未命名的组(${groupIndex++})`,
         type: "组",
-        children: []
+        childrenlist: [
+    { id: 101, title: "子项1" ,type:'列表'},
+    { id: 102, title: "子项2" ,type:'列表' }
+  ]
     };
     listStore.add(newGroup);
     isShowAddGroup.value = false;
 };
+
+
+    const cancelGroup = (id) => {
+        console.log('删除1')
+        listStore.cancel(id)
+    }
 
     return{
         groupName,
@@ -32,5 +41,6 @@ const addGroup = () => {
         isShowAddGroup,
         openGroup,
         addGroup,
+        cancelGroup
     }
 }
