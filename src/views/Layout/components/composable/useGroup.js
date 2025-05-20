@@ -20,7 +20,8 @@ const addGroup = () => {
         id: Date.now(),
         title: groupName.value || `未命名的组(${groupIndex++})`,
         type: "组",
-        childrenlist: []
+        childrenlist: [
+        ]
     };
     listStore.add(newGroup);
     isShowAddGroup.value = false;

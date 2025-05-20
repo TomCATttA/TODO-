@@ -44,17 +44,16 @@ const updateName = (id) => {
   isEdit.value = ""; // 重置编辑状态
   changeName.value = ""; // 清空输入
 };
-const group = ref({
+const group = {
   name: "groups", //分组名称groups的组之间可以相互拖拽
   pull: true, //是否允许拖出当前组
   put: true, //是否允许拖入当前组
-});
+};
 
-const  onDragEnd = (evt)=> {
-  console.log(listStore.list)
+const onDragEnd = (evt) => {
+  console.log(listStore.list);
   console.log('拖拽结束', evt);
-  // 这里可以添加数据处理的逻辑
-}
+};
 </script>
 <template>
   <div class="nav">
@@ -82,16 +81,21 @@ const  onDragEnd = (evt)=> {
       </ul>
     </div>
     <div class="nav-bottom">
-      <ul>
+      <div class="nav-bottom-info">
         <draggable
           v-model="listStore.list"
           item-key="id"
+
           :group="group"
+          :fallback-on-body="true"
+           :empty-insert-threshold="50"
+
           animation="1000"
           @end="onDragEnd"
         >
           <template #item="{ element }">
-            <li :key="element.id">
+            <div :key="element.id" class="lists">
+              
               <div class="info" v-show="isEdit !== element.id">
                  <i
                 :class="[
@@ -114,8 +118,8 @@ const  onDragEnd = (evt)=> {
                   "
                 >
                 </i>
-                 
               </div>
+
               <div class="editInput" v-show="isEdit === element.id">
                  <i
                 :class="[
@@ -125,10 +129,11 @@ const  onDragEnd = (evt)=> {
               ></i>
               <input
                 :data-ref="'rename-' + element.id"
-                
                 type="text"
                 @blur="updateName(element.id)"
                 v-model="changeName"
+
+                 :fallback-on-body="true"
               />
               </div>
               <draggable
@@ -140,22 +145,26 @@ const  onDragEnd = (evt)=> {
                 @end="onDragEnd"
                 class="sortable-list"
               >
-
-            <template #item="{element:subElement}">
-    <div class="subItem" :key="subElement.id">
-      <i class="iconfont icon-liebiao-zu"></i>{{subElement.title}}
-    </div>
-  </template>
-  <!-- 添加空状态提示 -->
-  <template #footer v-if="!element.childrenlist || element.childrenlist.length === 0">
-    <div class="empty-group-placeholder"></div>
-  </template>
+                <template #item="{element:subElement}">
+                  <div class="subItem" :key="subElement.id">
+                    <i class="iconfont icon-liebiao-zu"></i>{{subElement.title}}
+                  </div>
+                </template>
+                <!-- 添加空状态提示 -->
+                <template #footer v-if="!element.childrenlist || element.childrenlist.length === 0">
+                  <div  style="height: 5px; opacity: 0; pointer-events: none;"></div>
+                </template>
               </draggable>
-            </li>
+            </div>
           </template>
+
+          <template #footer>
+    <div style="height: 5px; opacity: 0; pointer-events: none;"></div>
+  </template>
+  
         </draggable>
         <!-- 添加列表 -->
-        <li v-show="isShowAddList" class="inputInfo">
+        <div v-show="isShowAddList" class="lists">
           <i class="iconfont icon-liebiao-zu"></i>
           <input
             type="text"
@@ -163,9 +172,9 @@ const  onDragEnd = (evt)=> {
             @blur="addList"
             v-model="listName"
           />
-        </li>
+        </div>
         <!-- 添加组 -->
-        <li v-show="isShowAddGroup"  class="inputInfo">
+        <div v-show="isShowAddGroup"  class="lists">
           <i class="iconfont icon-liebiao"></i
           ><input
             type="text"
@@ -173,8 +182,8 @@ const  onDragEnd = (evt)=> {
             @blur="addGroup"
             v-model="groupName"
           />
-        </li>
-      </ul>
+        </div>
+      </div>
       <div class="btn">
         <button class="btn1" @click="openList">
           <i class="iconfont icon-jiahao"></i><span>新建列表</span>
@@ -201,33 +210,33 @@ const  onDragEnd = (evt)=> {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    ul {
+    .nav-bottom-info{
       margin: 0;
       padding: 0;
-      list-style: none;
-      height: 100%;
-
+      // height: 100%;
+      // width: 100%;
       .editInput{
         height: 40px;
       }
-      li {
+      .lists{
         display: flex; // 必须启用
-      flex-direction: column; // 垂直排列
-      min-height: 40px; // 最小高度保障
+        flex-direction: column; // 垂直排列
+        min-height: 40px; // 最小高度保障
         padding-left: 10px;
         transition: 0.3s linear;
         position: relative;
         // 空组时的占位样式
-.empty-group-placeholder {
-  display: none;
-  height: 20px;
-  margin: 5px 0 5px 10px;
+        .empty-group-placeholder {
+  height: 40px;
+  margin: 5px 10px;
+  border: 2px dashed #cfcfcf;
+  border-radius: 6px;
 }
-       .subItem {
-      padding: 5px;
-      background: #e0e0e0;
-      margin: 5px;
-    }
+        .subItem {
+          padding: 5px;
+          background: #e0e0e0;
+          margin: 5px;
+        }
         .info {
           width: 200px;
           display: flex;
@@ -246,19 +255,12 @@ const  onDragEnd = (evt)=> {
           &:hover {
             color: #1f1f1f;
           }
-
         }
         &:hover {
           .icon-zhongmingming,
           .icon-quxiao {
             opacity: 1; 
           }
-          .empty-group-placeholder {
-  display:block;
-  height: 20px;
-  margin: 5px 0 5px 10px;
-}
-
         }
         p {
           white-space: nowrap;
@@ -285,7 +287,6 @@ const  onDragEnd = (evt)=> {
         }
       }
     }
-
     .btn {
       display: flex;
       .btn1 {
