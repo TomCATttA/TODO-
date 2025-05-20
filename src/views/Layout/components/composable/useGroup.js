@@ -20,20 +20,12 @@ const addGroup = () => {
         id: Date.now(),
         title: groupName.value || `未命名的组(${groupIndex++})`,
         type: "组",
-        childrenlist: [
-    { id: 101, title: "子项1" ,type:'列表'},
-    { id: 102, title: "子项2" ,type:'列表' }
-  ]
+        childrenlist: []
     };
     listStore.add(newGroup);
     isShowAddGroup.value = false;
 };
 
-
-    const cancelGroup = (id) => {
-        console.log('删除1')
-        listStore.cancel(id)
-    }
 
     return{
         groupName,
@@ -41,6 +33,5 @@ const addGroup = () => {
         isShowAddGroup,
         openGroup,
         addGroup,
-        cancelGroup
     }
 }

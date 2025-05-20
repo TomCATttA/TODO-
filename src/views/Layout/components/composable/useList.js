@@ -25,10 +25,6 @@ export function useList() {
         listStore.add(newItem);
         isShowAddList.value = false;
     };
-    //删除列表
-    const delList = (id) => {
-        listStore.del(id)
-    }
 
     return {
         listName,
@@ -36,6 +32,5 @@ export function useList() {
         isShowAddList,
         openList,
         addList,
-        delList,
     };
 }

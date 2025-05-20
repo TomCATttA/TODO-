@@ -70,7 +70,7 @@ const  onDragEnd = (evt)=> {
         <li>
           <el-input v-model="search" style="width: 190px" placeholder="搜索...">
             <template #prefix>
-              <el-icon class="el-input__icon"><search /></el-icon>
+              <el-icon class="el-input__icon"><search/></el-icon>
             </template>
           </el-input>
         </li>
@@ -92,13 +92,13 @@ const  onDragEnd = (evt)=> {
         >
           <template #item="{ element }">
             <li :key="element.id">
-              <i
+              <div class="info" v-show="isEdit !== element.id">
+                 <i
                 :class="[
                   'iconfont',
                   element.type === '列表' ? 'icon-liebiao-zu' : 'icon-liebiao',
                 ]"
               ></i>
-              <div class="info" v-show="isEdit !== element.id">
                 <p class="title">{{ element.title }}</p>
                 <i
                   class="iconfont icon-zhongmingming"
@@ -109,11 +109,27 @@ const  onDragEnd = (evt)=> {
                   class="iconfont icon-quxiao"
                   @click="
                     element.type === '列表'
-                      ? delList(element.id)
-                      : cancelGroup(element.id)
+                      ? listStore.del(element.id)
+                      : listStore.del(element.id)
                   "
                 >
                 </i>
+                 
+              </div>
+              <div class="editInput" v-show="isEdit === element.id">
+                 <i
+                :class="[
+                  'iconfont',
+                  element.type === '列表' ? 'icon-liebiao-zu' : 'icon-liebiao',
+                ]"
+              ></i>
+              <input
+                :data-ref="'rename-' + element.id"
+                
+                type="text"
+                @blur="updateName(element.id)"
+                v-model="changeName"
+              />
               </div>
               <draggable
                 v-if="element.type === '组'"
@@ -121,25 +137,27 @@ const  onDragEnd = (evt)=> {
                 item-key="id"
                 :group="group"
                 animation="1000"
+                @end="onDragEnd"
+                class="sortable-list"
               >
-              <template #item="{element:subElement}">
-                <div class="subItem" :key="subElement.id">{{subElement.title}}xxxx</div>
-              </template>
+
+            <template #item="{element:subElement}">
+    <div class="subItem" :key="subElement.id">
+      <i class="iconfont icon-liebiao-zu"></i>{{subElement.title}}
+    </div>
+  </template>
+  <!-- 添加空状态提示 -->
+  <template #footer v-if="!element.childrenlist || element.childrenlist.length === 0">
+    <div class="empty-group-placeholder"></div>
+  </template>
               </draggable>
-              <input
-                :data-ref="'rename-' + element.id"
-                v-show="isEdit === element.id"
-                type="text"
-                @blur="updateName(element.id)"
-                v-model="changeName"
-              />
             </li>
           </template>
         </draggable>
         <!-- 添加列表 -->
-        <li v-show="isShowAddList">
-          <i class="iconfont icon-liebiao-zu"></i
-          ><input
+        <li v-show="isShowAddList" class="inputInfo">
+          <i class="iconfont icon-liebiao-zu"></i>
+          <input
             type="text"
             ref="inputRef1"
             @blur="addList"
@@ -147,7 +165,7 @@ const  onDragEnd = (evt)=> {
           />
         </li>
         <!-- 添加组 -->
-        <li v-show="isShowAddGroup">
+        <li v-show="isShowAddGroup"  class="inputInfo">
           <i class="iconfont icon-liebiao"></i
           ><input
             type="text"
@@ -187,49 +205,67 @@ const  onDragEnd = (evt)=> {
       margin: 0;
       padding: 0;
       list-style: none;
+      height: 100%;
+
+      .editInput{
+        height: 40px;
+      }
       li {
-        // height: 40px;
+        display: flex; // 必须启用
+      flex-direction: column; // 垂直排列
+      min-height: 40px; // 最小高度保障
         padding-left: 10px;
-        display: flex;
-        align-items: center;
         transition: 0.3s linear;
         position: relative;
+        // 空组时的占位样式
+.empty-group-placeholder {
+  display: none;
+  height: 20px;
+  margin: 5px 0 5px 10px;
+}
        .subItem {
-      padding: 8px;
+      padding: 5px;
       background: #e0e0e0;
-      margin: 5px 0 5px 10px;
+      margin: 5px;
     }
         .info {
-          width: 170px;
+          width: 200px;
           display: flex;
           align-items: center;
         }
         input {
           position: absolute;
           left: 30px;
+          height: 40px;
+          top: 10px;
         }
         .icon-zhongmingming,
         .icon-quxiao {
-          opacity: 0; // 默认隐藏
-          transition: opacity 0.3s; // 添加过渡效果
+          opacity: 0; 
+          transition: opacity 0.3s; 
           &:hover {
             color: #1f1f1f;
           }
+
         }
         &:hover {
           .icon-zhongmingming,
           .icon-quxiao {
-            opacity: 1; // 悬停时显示
+            opacity: 1; 
           }
-          background: #e3e3e3;
-          cursor: pointer;
+          .empty-group-placeholder {
+  display:block;
+  height: 20px;
+  margin: 5px 0 5px 10px;
+}
+
         }
         p {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
           font-size: 15px;
-          width: 110px;
+          width: 120px;
           color: #1f1f1f;
           padding-right: 8px;
           margin-top: 12px;
