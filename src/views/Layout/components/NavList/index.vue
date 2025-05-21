@@ -3,12 +3,15 @@ import { ref, nextTick ,reactive} from "vue";
 import { useListStore } from "@/stores/listStore";
 import draggable from "vuedraggable";
 //导入列表业务
-import { useList } from "../composable/useList";
+import { useList } from "./composable/useList";
 // 使用列表相关的 composable
 const { listName, inputRef1, isShowAddList, openList, addList, delList } =
   useList();
 //导入组业务
-import { useGroup } from "../composable/useGroup";
+import { useGroup } from "./composable/useGroup";
+//导入组件
+import MyGroup from "./components/MyGroup.vue";
+import MyList from "./components/MyList.vue";
 // 使用组相关的 composable
 const {
   groupName,
@@ -20,59 +23,36 @@ const {
 } = useGroup();
 const listStore = useListStore();
 const search = ref("");
-const isEdit = ref(null);
-const changeName = ref("");
-const rename = ref("");
 
-//重命名
-const openEdit = (id) => {
-  isEdit.value = id;
-  changeName.value = listStore.getTitle(id);
-  nextTick(() => {
-    const inputEl = document.querySelector(`[data-ref="rename-${id}"]`);
-    if (inputEl) {
-      inputEl.focus();
-      inputEl.select();
-    }
-  });
-};
-const updateName = (id) => {
-  if (changeName.value.trim()) {
-    // 检查是否有输入内容
-    listStore.edit(id, changeName.value);
-  }
-  isEdit.value = ""; // 重置编辑状态
-  changeName.value = ""; // 清空输入
-};
-
-
-const getGroup = (targetElement) => ({
-  name: 'root',
-  pull:true,
-
+const groupConfig = {
+  name: "shared",
+  pull: true,
   put: (to, from, dragEl) => {
     const draggedItem = dragEl?.__draggable_context?.element;
-    const targetItem = targetElement;
-    
-    // 允许 'list' 类型的项拖入任何容器
-    if (draggedItem?.type === '列表') {
+    const targetItem = to?.component?.props?.listItem;
+
+    // 列表可以进组
+    if (draggedItem?.type === "列表" && targetItem?.type === "组") {
       return true;
     }
-    
-    // 禁止 'group' 类型的项放入 'group' 中
-    if (draggedItem?.type === '组' && targetItem?.type === '组') {
+
+    // 组不能嵌套进组
+    if (draggedItem?.type === "组" && targetItem?.type === "组") {
       return false;
     }
-    
-    // 允许 'group' 类型项在同一容器内排序
+
     return true;
-  }
-});
+  },
+};
+
 
 const onDragEnd = (evt) => {
-  console.log(listStore.list);
   console.log('拖拽结束', evt);
+  nextTick(() => {
+    console.log('更新后的数据：', JSON.stringify(listStore.list, null, 2));
+  });
 };
+
 </script>
 <template>
   <div class="nav">
@@ -104,77 +84,37 @@ const onDragEnd = (evt) => {
         <draggable
           v-model="listStore.list"
           item-key="id"
-
-          :group="getGroup()"
+          :group="groupConfig"
           :fallback-on-body="true"
-           :empty-insert-threshold="50"
-
+          :empty-insert-threshold="50"
           animation="1000"
           @end="onDragEnd"
         >
           <template #item="{ element }">
-            <div :key="element.id" class="lists">
-              
-              <div class="info" v-show="isEdit !== element.id">
-                 <i
-                :class="[
-                  'iconfont',
-                  element.type === '列表' ? 'icon-liebiao-zu' : 'icon-liebiao',
-                ]"
-              ></i>
-                <p class="title">{{ element.title }}</p>
-                <i
-                  class="iconfont icon-zhongmingming"
-                  @click="openEdit(element.id)"
-                >
-                </i>
-                <i
-                  class="iconfont icon-quxiao"
-                  @click="
-                    element.type === '列表'
-                      ? listStore.del(element.id)
-                      : listStore.del(element.id)
-                  "
-                >
-                </i>
-              </div>
-
-              <div class="editInput" v-show="isEdit === element.id">
-                 <i
-                :class="[
-                  'iconfont',
-                  element.type === '列表' ? 'icon-liebiao-zu' : 'icon-liebiao',
-                ]"
-              ></i>
-              <input
-                :data-ref="'rename-' + element.id"
-                type="text"
-                @blur="updateName(element.id)"
-                v-model="changeName"
-
-                 :fallback-on-body="true"
-              />
-              </div>
-              <draggable
-                v-if="element.type === '组'"
-                v-model="element.childrenlist"
-                item-key="id"
-                :group="getGroup(element)"
-                animation="1000"
-                @end="onDragEnd"
-                class="sortable-list"
-              >
-                <template #item="{element:subElement}">
-                  <div class="subItem" :key="subElement.id">
-                    <i class="iconfont icon-liebiao-zu"></i>{{subElement.title}}
-                  </div>
-                </template>
-                <!-- 添加空状态占位 -->
-                <!-- <template #footer v-if="!element.childrenlist || element.childrenlist.length === 0">
-                  <div  style="" class="empty"></div>
-                </template> -->
-              </draggable>
-            </div>
+            <div>
+                <MyGroup :id="element.id" :title="element.title" :type="element.type" v-if="element.type === '组'"/>
+                <MyList :id="element.id" :title="element.title" :type="element.type" v-if="element.type === '列表'"/>
+                 <draggable
+          v-model="element.childrenlist"
+           v-if="element.type === '组'"
+          item-key="id"
+          :group="groupConfig"
+          :fallback-on-body="true"
+          :empty-insert-threshold="50"
+          animation="1000"
+          @end="onDragEnd"
+             >
+             <template #item="{element:subElement}">
+                <div class="subItem">
+                    <MyList :id="subElement.id" :title="subElement.title" :type="subElement.type"/>
+                </div>
+             </template>
+             <template #footer>
+    <div style="height: 1px; opacity: 0; pointer-events: none;"></div>
+  </template>
+            </draggable>
+           </div>
+                
           </template>
             <!-- 空状态占位 -->
           <template #footer>

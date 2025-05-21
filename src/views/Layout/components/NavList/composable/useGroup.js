@@ -21,6 +21,9 @@ const addGroup = () => {
         title: groupName.value || `未命名的组(${groupIndex++})`,
         type: "组",
         childrenlist: [
+            {
+                title:'xxx'
+            }
         ]
     };
     listStore.add(newGroup);
