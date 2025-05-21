@@ -1,5 +1,5 @@
 <script setup>
-import NavList from "./components/NavList.vue"
+import NavList from "./components/NavList/index.vue"
 </script> 
 
 <template>

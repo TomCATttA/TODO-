@@ -3,12 +3,12 @@ import { ref, nextTick ,reactive} from "vue";
 import { useListStore } from "@/stores/listStore";
 import draggable from "vuedraggable";
 //导入列表业务
-import { useList } from "./composable/useList";
+import { useList } from "../composable/useList";
 // 使用列表相关的 composable
 const { listName, inputRef1, isShowAddList, openList, addList, delList } =
   useList();
 //导入组业务
-import { useGroup } from "./composable/useGroup";
+import { useGroup } from "../composable/useGroup";
 // 使用组相关的 composable
 const {
   groupName,
@@ -44,11 +44,30 @@ const updateName = (id) => {
   isEdit.value = ""; // 重置编辑状态
   changeName.value = ""; // 清空输入
 };
-const group = {
-  name: "groups", //分组名称groups的组之间可以相互拖拽
-  pull: true, //是否允许拖出当前组
-  put: true, //是否允许拖入当前组
-};
+
+
+const getGroup = (targetElement) => ({
+  name: 'root',
+  pull:true,
+
+  put: (to, from, dragEl) => {
+    const draggedItem = dragEl?.__draggable_context?.element;
+    const targetItem = targetElement;
+    
+    // 允许 'list' 类型的项拖入任何容器
+    if (draggedItem?.type === '列表') {
+      return true;
+    }
+    
+    // 禁止 'group' 类型的项放入 'group' 中
+    if (draggedItem?.type === '组' && targetItem?.type === '组') {
+      return false;
+    }
+    
+    // 允许 'group' 类型项在同一容器内排序
+    return true;
+  }
+});
 
 const onDragEnd = (evt) => {
   console.log(listStore.list);
@@ -86,7 +105,7 @@ const onDragEnd = (evt) => {
           v-model="listStore.list"
           item-key="id"
 
-          :group="group"
+          :group="getGroup()"
           :fallback-on-body="true"
            :empty-insert-threshold="50"
 
@@ -140,7 +159,7 @@ const onDragEnd = (evt) => {
                 v-if="element.type === '组'"
                 v-model="element.childrenlist"
                 item-key="id"
-                :group="group"
+                :group="getGroup(element)"
                 animation="1000"
                 @end="onDragEnd"
                 class="sortable-list"
@@ -150,18 +169,17 @@ const onDragEnd = (evt) => {
                     <i class="iconfont icon-liebiao-zu"></i>{{subElement.title}}
                   </div>
                 </template>
-                <!-- 添加空状态提示 -->
-                <template #footer v-if="!element.childrenlist || element.childrenlist.length === 0">
-                  <div  style="height: 5px; opacity: 0; pointer-events: none;"></div>
-                </template>
+                <!-- 添加空状态占位 -->
+                <!-- <template #footer v-if="!element.childrenlist || element.childrenlist.length === 0">
+                  <div  style="" class="empty"></div>
+                </template> -->
               </draggable>
             </div>
           </template>
-
+            <!-- 空状态占位 -->
           <template #footer>
-    <div style="height: 5px; opacity: 0; pointer-events: none;"></div>
+    <div style="height: 1px; opacity: 0; pointer-events: none;"></div>
   </template>
-  
         </draggable>
         <!-- 添加列表 -->
         <div v-show="isShowAddList" class="lists">
@@ -213,29 +231,33 @@ const onDragEnd = (evt) => {
     .nav-bottom-info{
       margin: 0;
       padding: 0;
-      // height: 100%;
-      // width: 100%;
       .editInput{
         height: 40px;
       }
       .lists{
-        display: flex; // 必须启用
-        flex-direction: column; // 垂直排列
-        min-height: 40px; // 最小高度保障
+        display: flex; 
+        flex-direction: column; 
+        min-height: 40px; 
         padding-left: 10px;
         transition: 0.3s linear;
         position: relative;
-        // 空组时的占位样式
-        .empty-group-placeholder {
-  height: 40px;
-  margin: 5px 10px;
-  border: 2px dashed #cfcfcf;
-  border-radius: 6px;
-}
+        .empty{
+            height: 40px; 
+            opacity: 0; 
+            pointer-events: none;
+            position: relative;
+            top: -40px;
+            left: 0;
+        }
         .subItem {
-          padding: 5px;
+          padding-left: 0;
           background: #e0e0e0;
-          margin: 5px;
+          height: 30px;
+          border-radius: 5px;
+          line-height: 30px;
+          padding: 5px;
+          margin-right: 5px;
+        //   display: none;
         }
         .info {
           width: 200px;
