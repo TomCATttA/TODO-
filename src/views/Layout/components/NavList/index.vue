@@ -1,7 +1,8 @@
 <script setup>
-import { ref, nextTick ,reactive} from "vue";
+import { ref, nextTick, reactive } from "vue";
 import { useListStore } from "@/stores/listStore";
-import draggable from "vuedraggable";
+import { VueDraggable } from "vue-draggable-plus";
+
 //导入列表业务
 import { useList } from "./composable/useList";
 // 使用列表相关的 composable
@@ -23,43 +24,70 @@ const {
 } = useGroup();
 const listStore = useListStore();
 const search = ref("");
+const isDragging = ref(false);
+const isDropping = ref(false);
 
-const groupConfig = {
-  name: "shared",
+//拖拽
+//设置group规则
+const getGroupA = ref({
+  name: "lists",
   pull: true,
-  put: (to, from, dragEl) => {
-    const draggedItem = dragEl?.__draggable_context?.element;
-    const targetItem = to?.component?.props?.listItem;
+  put: true,
+});
 
-    // 列表可以进组
-    if (draggedItem?.type === "列表" && targetItem?.type === "组") {
-      return true;
-    }
+const getGroupB = ref({
+  name: "lists",
+  pull: true,
+  put: true,
+});
 
-    // 组不能嵌套进组
-    if (draggedItem?.type === "组" && targetItem?.type === "组") {
-      return false;
-    }
-
-    return true;
-  },
+const onStartDrag = (evt) => {
+  if (evt.data.type === "列表") {
+    isDragging.value = true;
+  }
+  if (evt.data.type === "组") {
+    getGroupB.value.put = false;
+  }
 };
 
+const onStartDrop = (evt) => {
+  if (evt.data.type === "列表") {
+    isDropping.value = true;
+  }
+};
+const onAdd = (evt) => {
+  console.log("触发", evt);
+};
 
 const onDragEnd = (evt) => {
-  console.log('拖拽结束', evt);
+  console.log("拖拽结束", evt);
+  isDropping.value = false;
+  isDragging.value = false;
+  getGroupB.value.put = true;
   nextTick(() => {
-    console.log('更新后的数据：', JSON.stringify(listStore.list, null, 2));
+    console.log("更新后的数据：", JSON.stringify(listStore.list, null, 2));
   });
 };
 
+//展开组
+const activeGroupId = ref(null)
+const handleGroupFold = (clickedId, shouldExpand) => {
+  activeGroupId.value = shouldExpand ? clickedId : null
+}
 </script>
 <template>
   <div class="nav">
     <div class="nav-top">
       <ul>
         <li>
-          <div class="img"></div>
+          <div class="img">
+            <el-avatar
+              shape="square"
+              :size="60"
+              fit="fill"
+              src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+            />
+          </div>
           <div class="useinfo">
             <p class="usename">aizhu</p>
             <p class="email">1688888888@qq.com</p>
@@ -68,7 +96,7 @@ const onDragEnd = (evt) => {
         <li>
           <el-input v-model="search" style="width: 190px" placeholder="搜索...">
             <template #prefix>
-              <el-icon class="el-input__icon"><search/></el-icon>
+              <el-icon class="el-input__icon"><search /></el-icon>
             </template>
           </el-input>
         </li>
@@ -81,46 +109,69 @@ const onDragEnd = (evt) => {
     </div>
     <div class="nav-bottom">
       <div class="nav-bottom-info">
-        <draggable
+        <VueDraggable
           v-model="listStore.list"
-          item-key="id"
-          :group="groupConfig"
-          :fallback-on-body="true"
-          :empty-insert-threshold="50"
+          ghostClass="ghost"
           animation="1000"
           @end="onDragEnd"
+          @start="onStartDrag"
+          @add="onAdd"
+          :group="getGroupA"
         >
-          <template #item="{ element }">
-            <div>
-                <MyGroup :id="element.id" :title="element.title" :type="element.type" v-if="element.type === '组'"/>
-                <MyList :id="element.id" :title="element.title" :type="element.type" v-if="element.type === '列表'"/>
-                 <draggable
-          v-model="element.childrenlist"
-           v-if="element.type === '组'"
-          item-key="id"
-          :group="groupConfig"
-          :fallback-on-body="true"
-          :empty-insert-threshold="50"
-          animation="1000"
-          @end="onDragEnd"
-             >
-             <template #item="{element:subElement}">
-                <div class="subItem">
-                    <MyList :id="subElement.id" :title="subElement.title" :type="subElement.type"/>
-                </div>
-             </template>
-             <template #footer>
-    <div style="height: 1px; opacity: 0; pointer-events: none;"></div>
-  </template>
-            </draggable>
-           </div>
-                
+          <div v-for="element in listStore.list" :key="element.id">
+            <MyGroup
+              :id="element.id"
+              :title="element.title"
+              :type="element.type"
+              :is-active="(activeGroupId === element.id)" 
+              v-if="element.type === '组'"
+              @get-isFold="handleGroupFold"
+            />
+            <MyList
+              :id="element.id"
+              :title="element.title"
+              :type="element.type"
+              v-if="element.type === '列表'"
+            />
+            <VueDraggable
+              v-model="element.childrenlist"
+              v-if="element.type === '组'"
+              :group="getGroupB"
+              animation="1000"
+              @end="onDragEnd"
+              @start="onStartDrop"
+            >
+                            <div 
+  class="empty-placeholder" 
+  v-show="activeGroupId === element.id && element.childrenlist.length === 0"
+>
+  +
+</div>
+              <template v-if="element.childrenlist.length === 0 || !(activeGroupId === element.id)">
+                <div class="empty-placeholder" v-show="isDragging">+</div>
+                <!-- 空状态占位 -->
+              </template>
+              <div
+                v-for="subElement in element.childrenlist"
+                :key="subElement.id"
+              >
+                <MyList
+                  :id="subElement.id"
+                  :title="subElement.title"
+                  :type="subElement.type"
+                  :el-id="element.id"
+                  class="subTitem"
+                  v-show="activeGroupId === element.id"
+                />
+
+              </div>
+            </VueDraggable>
+          </div>
+          <template v-if="isDropping">
+            <div class="drop-placeholder">-</div>
           </template>
-            <!-- 空状态占位 -->
-          <template #footer>
-    <div style="height: 1px; opacity: 0; pointer-events: none;"></div>
-  </template>
-        </draggable>
+        </VueDraggable>
+
         <!-- 添加列表 -->
         <div v-show="isShowAddList" class="lists">
           <i class="iconfont icon-liebiao-zu"></i>
@@ -132,7 +183,7 @@ const onDragEnd = (evt) => {
           />
         </div>
         <!-- 添加组 -->
-        <div v-show="isShowAddGroup"  class="lists">
+        <div v-show="isShowAddGroup" class="lists">
           <i class="iconfont icon-liebiao"></i
           ><input
             type="text"
@@ -168,86 +219,56 @@ const onDragEnd = (evt) => {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    .nav-bottom-info{
+    .nav-bottom-info {
       margin: 0;
       padding: 0;
-      .editInput{
-        height: 40px;
+      .subTitem {
+        margin-top: -20px;
+        margin: 0px 10px;
+        font-size: 14px;
+      }
+      .drop-placeholder {
+        height: 30px;
+        transition: 0.3s;
+        background: #e3f2fd;
+        border: 2px dashed #2196f3;
+        margin: 5px 10px;
+        text-align: center;
+        border-radius: 5px;
+        color: #2196f3;
+        font-weight: bold;
+      }
+      .empty-placeholder {
+        height: 30px;
+        transition: 0.3s;
+        background: #e3f2fd;
+        border: 2px dashed #2196f3;
+        margin: 5px 10px;
+        text-align: center;
+        border-radius: 5px;
+        color: #2196f3;
+        font-weight: bold;
       }
       .lists{
-        display: flex; 
-        flex-direction: column; 
-        min-height: 40px; 
-        padding-left: 10px;
-        transition: 0.3s linear;
-        position: relative;
-        .empty{
-            height: 40px; 
-            opacity: 0; 
-            pointer-events: none;
-            position: relative;
-            top: -40px;
-            left: 0;
-        }
-        .subItem {
-          padding-left: 0;
-          background: #e0e0e0;
-          height: 30px;
-          border-radius: 5px;
-          line-height: 30px;
-          padding: 5px;
+        .iconfont{
+          margin-left: 13px;
           margin-right: 5px;
-        //   display: none;
-        }
-        .info {
-          width: 200px;
-          display: flex;
-          align-items: center;
         }
         input {
-          position: absolute;
-          left: 30px;
-          height: 40px;
-          top: 10px;
-        }
-        .icon-zhongmingming,
-        .icon-quxiao {
-          opacity: 0; 
-          transition: opacity 0.3s; 
-          &:hover {
-            color: #1f1f1f;
-          }
-        }
-        &:hover {
-          .icon-zhongmingming,
-          .icon-quxiao {
-            opacity: 1; 
-          }
-        }
-        p {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          font-size: 15px;
-          width: 120px;
-          color: #1f1f1f;
-          padding-right: 8px;
-          margin-top: 12px;
-        }
-        i.iconfont {
-          padding-right: 10px;
-          font-size: 15px;
-        }
-        input {
-          width: 80px;
-          height: 20px;
-          outline: none;
-          border: 1px solid #e3e3e3;
-        }
-        input:focus {
-          border-color: #e3e3e3; /* 灰色边框 */
-        }
+              width: 100px;
+              padding: 4px 8px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              font-size: 14px;
+              transition: border-color 0.3s ease;
+            }
+            input:focus {
+              outline: none;
+              border-color:#3d5ddb;
+              
+            }
       }
+      
     }
     .btn {
       display: flex;
@@ -309,10 +330,10 @@ const onDragEnd = (evt) => {
           font-size: 15px;
         }
         .img {
-          border-radius: 50%;
-          background: rgb(0, 255, 242);
           width: 60px;
           height: 60px;
+          margin-right: 5px;
+          margin-left: 5px;
         }
         .useinfo {
           width: 125px;

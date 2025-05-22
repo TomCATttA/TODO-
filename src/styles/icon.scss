@@ -19,10 +19,10 @@
   color: #dcbaff; /* 任务 */
 }
 .icon-liebiao-zu{
-  color: #b9b9b9;/* 左侧组 */
+  color: #3d5ddb;/* 左侧列表 */
 }
 .icon-liebiao{
-  color: #b9b9b9;/* 左侧列表 */
+  color: #b9b9b9;/* 左侧组 */
 }
 
 .icon-quxiao{
@@ -30,4 +30,7 @@
 }
 .icon-zhongmingming{
   color: #b9b9b9;/* 重命名 */
+}
+p {
+  cursor: default; /* 鼠标变回箭头 */
 }
