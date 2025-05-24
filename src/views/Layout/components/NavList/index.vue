@@ -51,12 +51,9 @@ const onStartDrag = (evt) => {
 };
 
 const onStartDrop = (evt) => {
-  if (evt.data.type === "列表") {
+ if (evt?.data?.type === "列表") {
     isDropping.value = true;
   }
-};
-const onAdd = (evt) => {
-  console.log("触发", evt);
 };
 
 const onDragEnd = (evt) => {
@@ -74,6 +71,7 @@ const activeGroupId = ref(null)
 const handleGroupFold = (clickedId, shouldExpand) => {
   activeGroupId.value = shouldExpand ? clickedId : null
 }
+
 </script>
 <template>
   <div class="nav">
@@ -107,15 +105,17 @@ const handleGroupFold = (clickedId, shouldExpand) => {
         <li><i class="iconfont icon-home"></i>任务</li>
       </ul>
     </div>
+
     <div class="nav-bottom">
+       <el-scrollbar height="300px">
       <div class="nav-bottom-info">
+            
         <VueDraggable
           v-model="listStore.list"
           ghostClass="ghost"
           animation="1000"
           @end="onDragEnd"
           @start="onStartDrag"
-          @add="onAdd"
           :group="getGroupA"
         >
           <div v-for="element in listStore.list" :key="element.id">
@@ -141,20 +141,21 @@ const handleGroupFold = (clickedId, shouldExpand) => {
               @end="onDragEnd"
               @start="onStartDrop"
             >
-                            <div 
-  class="empty-placeholder" 
-  v-show="activeGroupId === element.id && element.childrenlist.length === 0"
+              <!-- <div 
+class="empty-placeholder" 
+v-show="activeGroupId === element.id && element.childrenlist.length === 0"
 >
   +
-</div>
+</div> -->
               <template v-if="element.childrenlist.length === 0 || !(activeGroupId === element.id)">
-                <div class="empty-placeholder" v-show="isDragging">+</div>
+                <div class="empty-placeholder" v-show="isDragging">拖入组</div>
                 <!-- 空状态占位 -->
               </template>
               <div
-                v-for="subElement in element.childrenlist"
-                :key="subElement.id"
-              >
+v-for="subElement in element.childrenlist"
+:key="subElement.id"
+>
+
                 <MyList
                   :id="subElement.id"
                   :title="subElement.title"
@@ -171,7 +172,7 @@ const handleGroupFold = (clickedId, shouldExpand) => {
             <div class="drop-placeholder">-</div>
           </template>
         </VueDraggable>
-
+ 
         <!-- 添加列表 -->
         <div v-show="isShowAddList" class="lists">
           <i class="iconfont icon-liebiao-zu"></i>
@@ -182,6 +183,7 @@ const handleGroupFold = (clickedId, shouldExpand) => {
             v-model="listName"
           />
         </div>
+
         <!-- 添加组 -->
         <div v-show="isShowAddGroup" class="lists">
           <i class="iconfont icon-liebiao"></i
@@ -192,7 +194,9 @@ const handleGroupFold = (clickedId, shouldExpand) => {
             v-model="groupName"
           />
         </div>
+      
       </div>
+       </el-scrollbar>
       <div class="btn">
         <button class="btn1" @click="openList">
           <i class="iconfont icon-jiahao"></i><span>新建列表</span>
@@ -201,7 +205,9 @@ const handleGroupFold = (clickedId, shouldExpand) => {
           <i class="iconfont icon-zubie"></i>
         </button>
       </div>
+
     </div>
+ 
   </div>
 </template>
 <style scoped lang="scss">
