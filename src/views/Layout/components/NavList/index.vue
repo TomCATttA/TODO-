@@ -109,7 +109,6 @@ const handleGroupFold = (clickedId, shouldExpand) => {
     <div class="nav-bottom">
        <el-scrollbar height="300px">
       <div class="nav-bottom-info">
-            
         <VueDraggable
           v-model="listStore.list"
           ghostClass="ghost"
@@ -123,7 +122,7 @@ const handleGroupFold = (clickedId, shouldExpand) => {
               :id="element.id"
               :title="element.title"
               :type="element.type"
-              :is-active="(activeGroupId === element.id)" 
+              :is-active="(activeGroupId === element.id) && element.childrenlist.length !== 0" 
               v-if="element.type === '组'"
               @get-isFold="handleGroupFold"
             />
@@ -141,12 +140,6 @@ const handleGroupFold = (clickedId, shouldExpand) => {
               @end="onDragEnd"
               @start="onStartDrop"
             >
-              <!-- <div 
-class="empty-placeholder" 
-v-show="activeGroupId === element.id && element.childrenlist.length === 0"
->
-  +
-</div> -->
               <template v-if="element.childrenlist.length === 0 || !(activeGroupId === element.id)">
                 <div class="empty-placeholder" v-show="isDragging">拖入组</div>
                 <!-- 空状态占位 -->
