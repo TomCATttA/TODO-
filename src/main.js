@@ -4,6 +4,8 @@ import '@/mock/index.js'
 import App from './App.vue'
 import { createPinia } from 'pinia'
 import '@/styles/icon.scss';
+import 'element-plus/theme-chalk/el-message.css'
+
 const app = createApp(App)
 const pinia = createPinia()
 app.use(router)
