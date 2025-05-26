@@ -2,7 +2,7 @@
 import { ref, nextTick, reactive } from "vue";
 import { useListStore } from "@/stores/listStore";
 import { VueDraggable } from "vue-draggable-plus";
-
+import {useUserStore} from "@/stores/userStore"
 //导入列表业务
 import { useList } from "./composable/useList";
 // 使用列表相关的 composable
@@ -23,6 +23,7 @@ const {
   cancelGroup,
 } = useGroup();
 const listStore = useListStore();
+const userStore = useUserStore()
 const search = ref("");
 const isDragging = ref(false);
 const isDropping = ref(false);
@@ -83,12 +84,12 @@ const handleGroupFold = (clickedId, shouldExpand) => {
               shape="square"
               :size="60"
               fit="fill"
-              src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+              :src="userStore.userInfo.imgUrl"
             />
           </div>
           <div class="useinfo">
-            <p class="usename">aizhu</p>
-            <p class="email">1688888888@qq.com</p>
+            <p class="usename">{{userStore.userInfo.username}}</p>
+            <p class="email">{{userStore.userInfo.email}}</p>
           </div>
         </li>
         <li>

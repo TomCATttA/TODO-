@@ -7,6 +7,8 @@ const accountInfo = [
     'account':'zzaa',
     'password':'123456',
     'id':'101',
+    'username':'zzaa',
+    'email':'1688888888@qq.com',
     'imgUrl':'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
     "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ7XCJuYW1lXCI6XCLkvKDmmbrmlZnogrIrMVwiLFwiaWRcIjpcIjEzNjk1OTQ5NTQ3Mzk4NTk0NThcIixcInVzZXJuYW1lXCI6XCJ4aWFvdHV4aWFuMDAxXCJ9IiwiaWF0IjoxNjU1NDcxNTExLCJleHAiOjE2NTU3MzA3MTF9.pruHg2laVUHy84NHI8QFCkG2tzTbDy8ASAaHpm7iHxE",
     }
@@ -28,7 +30,9 @@ Mock.mock(`${baseURL}/login`,'post',(userInfo)=>{
                 account:user.account,
                 imgUrl:user.imgUrl,
                 token:user.token,
-                id:user.id
+                id:user.id,
+                username:user.username,
+                email:user.email
             }
         }
     }else{

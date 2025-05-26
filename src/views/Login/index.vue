@@ -1,17 +1,18 @@
 <script setup>
 import scrollTitle from "./components/scrollTitle.vue";
 import { ref } from "vue";
-import {loginApi} from "@/apis/user"
-import { ElMessage} from "element-plus";
-import {useRouter} from 'vue-router'
+import { loginApi } from "@/apis/user";
+import { ElMessage } from "element-plus";
+import { useRouter } from "vue-router";
+import {useUserStore} from "@/stores/userStore"
 
-const router = useRouter()
-
+const router = useRouter();
+const userStore = useUserStore()
 //1.表单对象
 const form = ref({
   account: "",
   password: "",
-  agree:true
+  agree: true,
 });
 //2.规则对象
 const rules = {
@@ -22,51 +23,47 @@ const rules = {
   ],
   //自定义校验规则
   //如果勾选了协议则通过校验，否则不通过
-  agree:[
+  agree: [
     {
-      validator:(rule,value,callback)=>{
+      validator: (rule, value, callback) => {
         //自定义校验逻辑
         //勾选：通过   不勾选：不通过
-        if(value){
-          callback()
-        }else{
-          callback(new Error('请勾选协议'))
+        if (value) {
+          callback();
+        } else {
+          callback(new Error("请勾选协议"));
         }
-      }
-    }
-  ]
+      },
+    },
+  ],
 };
 
 //获取form实例做统一校验
-const formRef = ref(null)
+const formRef = ref(null);
 const doLogin = () => {
-  const {account,password} = form.value
-  formRef.value.validate(async (valid) => {
+  const { account, password } = form.value;
+  formRef.value.validate((valid) => {
     if (valid) {
-      const res = await loginApi({account,password})
-      if(res.data.code === 1){
-           //1.登录成功
-      //提示用户
-      ElMessage({
-    message: '登录成功',
-    type: 'success',
-  })
-      //跳转首页
-        router.replace({path:'/'})
-      }else{
-          //2.登录失败
-             ElMessage({
-    message: res.data.msg,
-    type: 'warning',
-  })
+      const res = userStore.getUserInfo({account,password})
+      if (res) {
+        //1.登录成功
+        //提示用户
+        ElMessage({
+          message: "登录成功",
+          type: "success",
+        });
+        //跳转首页
+        router.replace({ path: "/" });
+      } else {
+        //2.登录失败
+        ElMessage({
+          message:"用户不存在或密码错误",
+          type: "warning",
+        });
       }
-   
-      
-      
-    } 
-  })
-}
-
+    }
+  });
+};
 </script>
 
 <template>
@@ -100,11 +97,13 @@ const doLogin = () => {
         </el-form-item>
         <p>
           <span class="check">
-             <el-form-item prop="agree">
-            <el-checkbox v-model="form.agree">同意协议 </el-checkbox>
+            <el-form-item prop="agree">
+              <el-checkbox v-model="form.agree">同意协议 </el-checkbox>
             </el-form-item>
-            </span>
-          <el-button color="#002FA7" class="btn" @click="doLogin">登录</el-button>
+          </span>
+          <el-button color="#002FA7" class="btn" @click="doLogin"
+            >登录</el-button
+          >
           <el-button type="success">登录</el-button>
         </p>
       </el-form>
