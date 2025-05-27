@@ -3,9 +3,15 @@ import NavList from "./components/NavList/index.vue"
 </script> 
 
 <template>
-    <nav-list></nav-list>
+    <div class="body">
+        <nav-list></nav-list>
+        <router-view></router-view>
+    </div>
+    
 </template>
 
 <style scoped lang="scss">
-    
+    .body{
+        display: flex;
+    }
 </style>

@@ -16,8 +16,8 @@ const accountInfo = [
 
 Mock.mock(`${baseURL}/login`,'post',(userInfo)=>{
     const body =JSON.parse(userInfo.body) 
-    //查找是否有满足条件的用户
-    const user = accountInfo.find(item=>
+            //查找是否有满足条件的用户
+ const user = accountInfo.find(item=>
         (item.account === body.account) && (item.password === body.password)
     )
     //如果用户存在
@@ -43,6 +43,6 @@ Mock.mock(`${baseURL}/login`,'post',(userInfo)=>{
             msg:'用户不存在或密码错误'
         }
     }
-    
+   
 })
 

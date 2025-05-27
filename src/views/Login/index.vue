@@ -1,6 +1,6 @@
 <script setup>
 import scrollTitle from "./components/scrollTitle.vue";
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
 import { loginApi } from "@/apis/user";
 import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
@@ -45,7 +45,8 @@ const doLogin = () => {
   formRef.value.validate((valid) => {
     if (valid) {
       const res = userStore.getUserInfo({account,password})
-      if (res) {
+      nextTick(()=>{
+ if (res) {
         //1.登录成功
         //提示用户
         ElMessage({
@@ -53,7 +54,10 @@ const doLogin = () => {
           type: "success",
         });
         //跳转首页
-        router.replace({ path: "/" });
+        if(userStore.getUserInfo)(
+          router.replace({ path: "/" })
+        )
+       
       } else {
         //2.登录失败
         ElMessage({
@@ -61,6 +65,8 @@ const doLogin = () => {
           type: "warning",
         });
       }
+      })
+     
     }
   });
 };
@@ -104,7 +110,6 @@ const doLogin = () => {
           <el-button color="#002FA7" class="btn" @click="doLogin"
             >登录</el-button
           >
-          <el-button type="success">登录</el-button>
         </p>
       </el-form>
     </div>

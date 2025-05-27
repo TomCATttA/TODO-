@@ -1,18 +1,18 @@
 <script setup>
-import { ref, nextTick, reactive } from "vue";
+import { ref, nextTick, reactive, onMounted, onBeforeMount } from "vue";
 import { useListStore } from "@/stores/listStore";
 import { VueDraggable } from "vue-draggable-plus";
 import {useUserStore} from "@/stores/userStore"
 //导入列表业务
 import { useList } from "./composable/useList";
 // 使用列表相关的 composable
-const { listName, inputRef1, isShowAddList, openList, addList, delList } =
-  useList();
+const { listName, inputRef1, isShowAddList, openList, addList, delList } = useList();
 //导入组业务
 import { useGroup } from "./composable/useGroup";
 //导入组件
 import MyGroup from "./components/MyGroup.vue";
 import MyList from "./components/MyList.vue";
+import { useRouter } from "vue-router";
 // 使用组相关的 composable
 const {
   groupName,
@@ -27,7 +27,7 @@ const userStore = useUserStore()
 const search = ref("");
 const isDragging = ref(false);
 const isDropping = ref(false);
-
+const router = useRouter()
 //拖拽
 //设置group规则
 const getGroupA = ref({
@@ -72,14 +72,37 @@ const activeGroupId = ref(null)
 const handleGroupFold = (clickedId, shouldExpand) => {
   activeGroupId.value = shouldExpand ? clickedId : null
 }
-
+//登录情况验证
+onBeforeMount(()=>{
+  //token不存在则跳到登录页面
+  if(!userStore.userInfo.token){
+    router.replace('/login')
+  }
+})
+//退出登录
+//确定退出登录
+const confirmEvent = () => {
+   userStore.userInfo = ''
+   router.replace('/login')
+}
 </script>
 <template>
   <div class="nav">
     <div class="nav-top">
       <ul>
         <li>
-          <div class="img">
+          <el-popconfirm
+    confirm-button-text="确定"
+    cancel-button-text="取消"
+    :icon="InfoFilled"
+    icon-color="#626AEF"
+    title="你确定要退出登录吗?"
+    @confirm="confirmEvent"
+    @cancel="cancelEvent"
+  >
+    <template #reference>
+      <div class="user">
+      <div class="img">
             <el-avatar
               shape="square"
               :size="60"
@@ -91,6 +114,10 @@ const handleGroupFold = (clickedId, shouldExpand) => {
             <p class="usename">{{userStore.userInfo.username}}</p>
             <p class="email">{{userStore.userInfo.email}}</p>
           </div>
+          </div>
+    </template>
+  </el-popconfirm>
+         
         </li>
         <li>
           <el-input v-model="search" style="width: 190px" placeholder="搜索...">
@@ -208,9 +235,8 @@ v-for="subElement in element.childrenlist"
 .nav {
   width: 210px;
   height: 100%;
-  background: rgba(240, 239, 239, 0.815);
-  box-shadow: 5px 0 5px -2px #e3e3e3;
-  border-radius: 10px;
+  background: #efeeec;
+  border-radius: 5px;
   position: relative;
   .nav-bottom {
     height: 330px;
@@ -272,6 +298,7 @@ v-for="subElement in element.childrenlist"
     }
     .btn {
       display: flex;
+ 
       .btn1 {
         border: 0;
         width: 170px;
@@ -279,6 +306,8 @@ v-for="subElement in element.childrenlist"
         display: flex;
         align-items: center;
         transition: 0.3s;
+         background: #efeeec;
+        border-radius: 5px;
         i.iconfont {
           margin-right: 30px;
           margin-left: 10px;
@@ -291,6 +320,8 @@ v-for="subElement in element.childrenlist"
       .btn2 {
         width: 40px;
         height: 40px;
+         background: #efeeec;
+            border-radius: 5px;
         border: 0;
         &:hover {
           background: #e3e3e3;
@@ -329,6 +360,12 @@ v-for="subElement in element.childrenlist"
           padding-right: 10px;
           font-size: 15px;
         }
+        .user{
+          display: flex;
+        }
+        // .el-tooltip__trigger{
+        //   width: 60px;
+        // }
         .img {
           width: 60px;
           height: 60px;

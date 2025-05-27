@@ -11,7 +11,6 @@ export const useListStore = defineStore('list',()=>{
       const base = type === '组' ? '未命名组' : '未命名列表';
       title = generateUniqueTitle(base, list.value, type);
     }
-
     const newItem = { id, title, type };
     if (type === '组') {
       newItem.childrenlist = childrenlist || [];
@@ -93,4 +92,6 @@ export const useListStore = defineStore('list',()=>{
         edit,
         getTitle,
     }
-})
+}, {
+    persist: true,
+  })

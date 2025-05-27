@@ -25,17 +25,7 @@ const delGroup = (id, title) => {
   })
     .then(() => {
       listStore.del(id);
-      // ElMessage({
-      //   type: 'success',
-      //   message: '删除成功',
-      // })
     })
-    .catch(() => {
-      // ElMessage({
-      //   type: 'info',
-      //   message: '取消删除',
-      // })
-    });
 };
 
 //重命名
