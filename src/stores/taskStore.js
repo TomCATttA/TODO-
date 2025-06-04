@@ -6,8 +6,8 @@ export const useTaskStore = defineStore('task',()=>{
     const task = ref([])
     const searchTask = ref({})
     //添加任务
-    const addTask = ({sort,tid,date,title,deadline})=>{
-        task.value.push({sort,tid,date,title,deadline})
+    const addTask = ({sort,tid,date,title,deadline,alertdate})=>{
+        task.value.push({sort,tid,date,title,deadline,alertdate})
     }
 
     //删除任务

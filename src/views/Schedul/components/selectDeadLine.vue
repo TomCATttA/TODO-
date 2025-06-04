@@ -92,7 +92,6 @@ const clearSelectDay = () => {
 //将截止时间传给父组件
 const emit = defineEmits(['get-dead-line'])
 const postDeadLine =()=>{
-    console.log('触发')
     emit('get-dead-line',selectDay.value,selectDate.value)
     if(props.tid){
         const task = taskStore.getTaskByTid(props.tid)
@@ -111,7 +110,7 @@ const postDeadLine =()=>{
             <div @click="getDay(1)"><div><i class="iconfont icon-jintian"></i>今天</div><span>{{today}}</span></div>
             <div @click="getDay(2)"><div><i class="iconfont icon-mingtian"></i>明天</div><span>{{nextday}}</span></div>
             <div @click="getDay(3)"><div><i class="iconfont icon-xiazhou"></i>下周</div><span>周一</span></div>
-            <div><div style="width:100px;"><i class="iconfont icon-24gl-calendar"></i><span class="select"><dateSelect @getDate="getDate"></dateSelect></span></div></div>
+            <div><div style="width:100px;"><dateSelect @getDate="getDate"></dateSelect></div></div>
             <div v-show="selectDay" @click="clearSelectDay"><div style="color:red"><i class="iconfont icon-a-shanchu1"></i>删除截止日期</div></div>
     </div>
      <el-tooltip
@@ -149,47 +148,50 @@ const postDeadLine =()=>{
                     }
 }
 
-      .selectDate{
-            width: 200px;
-            background: #f6f1eb;
-            position: absolute;
-            color: #353535;
-            font-size: 15px;
-            left: -80px;
-            bottom: 40px;
-            border-radius: 5px;
-            .icon-jintian,.icon-mingtian,.icon-xiazhou{
-                margin-right: 5px;
-            }
-            .select{
-                margin-right: 10px;
-                color: #353535;
-            }
-            div:nth-child(4) {
-                border-top: 1px solid rgb(202, 202, 202);
-                
-                    }
-            div{
-                height: 50px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 10px;
-                div{
-                    width: 120px;
-                     display: flex;
-                    justify-content: flex-start;
-                    .iconfont{
-                        margin-right: 10px;
-                        font-size: 15px;
-                    }
-                }
-                &:hover{
-                    background: #ffffff;
-                }
-            }
-            span{
-                color: #919191;
-            }
-         }
+      .selectDate {
+  width: 200px;
+  background: #f6f1eb;
+  position: absolute;
+  color: #353535;
+  font-size: 15px;
+  left: -80px;
+  bottom: 40px;
+  border-radius: 5px;
+
+  > div {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f6f1eb;
+    padding: 0 10px;
+    cursor: pointer; // 添加手型指针
+    transition: background 0.2s;
+
+    &:hover {
+      background: #ffffff; // 整行变色
+    }
+
+    > div {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      width: 120px;
+
+      .iconfont {
+        margin-right: 10px;
+        font-size: 15px;
+      }
+    }
+
+    span {
+      color: #919191;
+    }
+  }
+
+  > div:nth-child(4) {
+    border-top: 1px solid rgb(202, 202, 202);
+  }
+}
+
 </style>

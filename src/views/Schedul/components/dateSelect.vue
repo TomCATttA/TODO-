@@ -92,7 +92,7 @@ const isSelected = (d) => {
 </script>
 <template>
   <div class="date-picker">
-    <p @click="togglePicker">选择日期</p>
+    <div @click="togglePicker" class="dateSelect"><i class="iconfont icon-24gl-calendar"></i><p>选择日期</p></div>
     <div v-if="showPicker" class="calendar" ref="pickerRef">
       <div class="calendar-header">
         <button @click="prevMonth">←</button>
@@ -125,6 +125,13 @@ const isSelected = (d) => {
 .date-picker {
   position: relative;
   display: inline-block;
+  .dateSelect{
+    display: flex;
+    align-items: center;
+    .iconfont{
+      margin-right: 10px;
+    }
+  }
   p{
     display: block;
     height: 50px;
