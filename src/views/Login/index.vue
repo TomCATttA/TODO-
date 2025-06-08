@@ -40,35 +40,29 @@ const rules = {
 
 //获取form实例做统一校验
 const formRef = ref(null);
-const doLogin = () => {
+const doLogin = async () => {
   const { account, password } = form.value;
-  formRef.value.validate((valid) => {
-    if (valid) {
-      const res = userStore.getUserInfo({account,password})
-      nextTick(()=>{
- if (res) {
-        //1.登录成功
-        //提示用户
-        ElMessage({
-          message: "登录成功",
-          type: "success",
-        });
-        //跳转首页
-        if(userStore.getUserInfo)(
-          router.replace({ path: "/" })
-        )
-       
-      } else {
-        //2.登录失败
-        ElMessage({
-          message:"用户不存在或密码错误",
-          type: "warning",
-        });
-      }
-      })
-     
+    // 1. 表单验证
+    await formRef.value.validate();
+    // 2. 发起登录请求（异步等待）
+    await userStore.getUserInfo({ account, password });
+    if(userStore.userInfo){
+          // 3. 登录成功处理
+    ElMessage({
+      message: "登录成功",
+      type: "success",
+    });
+    // 4. 跳转页面
+    router.replace({ path: "/" });
     }
-  });
+    else{
+  //  错误处理
+    ElMessage({
+      message: "用户或密码错误",
+      type: "error",
+    });
+    }
+ 
 };
 </script>
 

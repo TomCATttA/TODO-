@@ -11,6 +11,8 @@ import { useTaskStore } from "@/stores/taskStore";
 import dayjs from "dayjs";
 import "dayjs/locale/zh-cn";
 dayjs.locale("zh-cn");
+//提醒时间
+import selectAlertDate from "./selectAlertDate.vue";
 //选择截止时间
 import selectDeadLine from "./selectDeadLine.vue";
 //选取截止时间菜单
@@ -57,19 +59,43 @@ const open = (id) => {
 };
 
 const useDeadLine = computed(() => {
-  console.log("截止日期", task.value.deadline);
-  if (task.value.deadline && task.value.deadline !== 'Invalid Date') {
-    const date = dayjs(task.value.deadline);
-    return date.format("YYYY年MM月DD日HH点mm分");
-  } else {
+  const deadline = task.value.deadline;
+  if (!deadline) return "添加截止日期";
+  if (typeof deadline === "string" && deadline.includes("Invalid Date")) {
     return "添加截止日期";
   }
+  const dateObj = dayjs(deadline);
+  if (!dateObj.isValid()) {
+    return "添加截止日期";
+  }
+  return dateObj.format("YYYY年MM月DD日HH点mm分")+' 截止';
+});
+
+const useAlert = computed(() => {
+  const alertTime = task.value.alertdate;
+  if (!alertTime) return "提醒我";
+  if (typeof alertTime === "string" && alertTime.includes("Invalid Date")) {
+    return "提醒我";
+  }
+  const dateObj = dayjs(alertTime);
+  if (!dateObj.isValid()) {
+    return "提醒我";
+  }
+  return dateObj.format("YYYY年MM月DD日HH点mm分")+' 提醒我';
 });
 
 //从我的一天中移除
 const delFromMyDay = (tid) => {
-  taskStore.del(tid)
-}
+  taskStore.del(tid);
+};
+
+//创建时间
+const createTime = computed(()=>{
+  console.log('时间',task.value.date)
+  const date = task.value.date
+  const dateObj = dayjs(date);
+  return dateObj.format("M月D日")
+})
 </script>
 <template>
   <div class="drawer">
@@ -97,26 +123,34 @@ const delFromMyDay = (tid) => {
           <i class="iconfont icon-quxiao" @click="delFromMyDay(task.tid)"> </i>
         </el-tooltip>
       </span>
-      <span v-else>
-        添加到"我的一天"
-      </span>
+      <span v-else> 添加到"我的一天" </span>
     </div>
     <div class="dateScope">
       <div class="alert">
-        <i class="iconfont icon-naozhong"></i><span>提醒我</span>
+        <div style="margin-left: 7px">
+          <selectAlertDate
+            :positionX="positionX"
+            :positionY="positionY"
+            :tid="task.tid"
+          ></selectAlertDate>
+        </div>
+        <span
+          style="margin-left: 7px"
+          :class="{ active1: useAlert !== '提醒我' }"
+          >{{ useAlert }}</span
+        >
       </div>
       <div class="todate">
         <div>
           <selectDeadLine
-            @getDeadLine="getDeadLine"
             :positionX="positionX"
             :positionY="positionY"
             :tid="task.tid"
           >
           </selectDeadLine>
         </div>
-        <span :class="{ active: useDeadLine !== '添加截止日期' }"
-          >{{ useDeadLine}}
+        <span :class="{ active2: useDeadLine !== '添加截止日期' }"
+          >{{ useDeadLine }}
         </span>
       </div>
       <div class="repeat">
@@ -124,7 +158,7 @@ const delFromMyDay = (tid) => {
       </div>
     </div>
     <div class="delete">
-      <div class="createDate"></div>
+      <div class="createDate">创建于{{createTime}}</div>
       <div><i class="iconfont icon-shanchu" @click="open(task.tid)"></i></div>
     </div>
   </div>
@@ -248,13 +282,21 @@ const delFromMyDay = (tid) => {
     width: 250px;
     margin: 0 auto;
     display: flex;
-    flex-direction: row-reverse;
+    // flex-direction: row-reverse;
+    justify-content: space-between;
     align-items: center;
     border-top: 1px solid rgb(211, 211, 211);
+    .createDate{
+      font-size: 15px;
+      color: #a4a4a4;
+    }
   }
 }
-.active {
+.active1 {
   color: rgb(50, 142, 255);
+}
+.active2 {
+  color: rgb(251, 114, 114);
 }
 .deadline {
   background: #f6f1eb;

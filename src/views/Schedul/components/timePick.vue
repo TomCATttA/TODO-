@@ -68,8 +68,8 @@ const emit = defineEmits(['get-alert-time'])
 const confirm = () => {
 const selected = new Date(year.value, month.value, selectedDay.value,selectedHour.value,selectedMinute.value)
 const date = dayjs(selected).tz("Asia/Shanghai")
-  const isoDate = date.format()
-  emit('get-alert-time',displayValue.value,isoDate)
+  // const isoDate = date.format()
+  emit('get-alert-time',displayValue.value,date)
   show.value = false
 }
 
@@ -115,7 +115,7 @@ const date = dayjs(selected).tz("Asia/Shanghai")
         </select>
       </div>
 
-      <!-- 确认按钮 -->
+      <!-- 确认 -->
       <div class="footer">
         <button @click="confirm">确认</button>
       </div>
@@ -132,7 +132,8 @@ const date = dayjs(selected).tz("Asia/Shanghai")
 
 .panel {
   position: absolute;
-  top: 40px;
+  bottom: -45px;
+  left: -20px;
   background: white;
   border: 1px solid #ccc;
   padding: 12px;

@@ -54,7 +54,6 @@ onMounted(() => {
       .main-content{
          height: 650px;
          margin-left: 35px;
-         transition: 0.3s linear;
          .title{
                height: 70px;
                   .section{
