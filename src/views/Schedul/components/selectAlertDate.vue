@@ -11,8 +11,8 @@ const isSelect = ref(false)
 //选择提醒时间
 //1.显示菜单中的时间
 //今天晚些时候,在现在的时间+4h
-const alertToday = dayjs().startOf('day').add(4,'hour')
-const today = dayjs().add(4,'hour').format('HH:00')
+const alertToday = dayjs().add(4,'hour')
+const today = alertToday.format('HH:mm')
 //明天9点
 const alertNext = dayjs().add(1, 'day').hour(9).minute(0);
 const weekNum = dayjs().day()
@@ -27,7 +27,6 @@ const getAlertTime = (val1,val2) => {
     showAlert.value = val1
     alertTime.value = val2
      postAlert()
-    console.log('提醒时间',val1,alertTime.value)
 }
 //3.在导航栏将选择的时间显示出来
 const showAlert = ref(null)
@@ -64,7 +63,6 @@ const postAlert = ()=>{
      if (props.tid) {
     const task = taskStore.getTaskByTid(props.tid);
     task.alertdate = alertTime.value;
-    console.log('更新', task.alertdate)
   }
 }
 
@@ -88,13 +86,6 @@ const delect = ()=>{
     task.alertdate = null;
   }
 }
-const isDelect = computed(()=>{
-    if (props.tid) {
-    return true
-  }else{
-     return false
-  }
-})
 
 const props = defineProps({
      positionX:String,
@@ -111,7 +102,7 @@ const props = defineProps({
             <div @click="selectAlertTime(2)"><div><i class="iconfont icon-mingtian1"></i>明天</div><span>{{nextday}}</span></div>
             <div @click="selectAlertTime(3)"><div><i class="iconfont icon-xiazhou1"></i>下周</div><span>{{nextWeek}}</span></div>
             <div><div style="width:150px;"><timePick class="timePick" @getAlertTime="getAlertTime"></timePick></div></div>
-            <div v-show="alertTime || isDelect" @click="delect"><div style="color:red"><i class="iconfont icon-a-shanchu1"></i>删除提醒</div></div>
+            <div v-show="alertTime" @click="delect"><div style="color:red"><i class="iconfont icon-a-shanchu1"></i>删除提醒</div></div>
         </div>
         <el-tooltip
                 content="提醒我"

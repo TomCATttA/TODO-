@@ -1,14 +1,35 @@
 import { defineStore } from "pinia";
 import {ref} from "vue"
-
+import dayjs from "dayjs";
 export const useTaskStore = defineStore('task',()=>{
-
     const task = ref([])
     const searchTask = ref({})
     //添加任务
-    const addTask = ({sort,tid,date,title,deadline,alertdate})=>{
-        task.value.push({sort,tid,date,title,deadline,alertdate})
-    }
+const addTask = (taskData) => {
+  // 解构参数，使用不同的变量名避免冲突
+  let { sort, tid, date, title, alertdate, repeatdate } = taskData;
+  let deadline = taskData.deadline; 
+  const dateObj = dayjs(deadline);
+  if (!dateObj.isValid() && repeatdate) {
+    deadline = dayjs().startOf("day").add(1, "day").toISOString();
+  }
+  else if (!dateObj.isValid()) {
+    deadline = null;
+  }
+  else if (dateObj.isValid()) {
+    deadline = dateObj.toISOString();
+  }
+  task.value.push({
+    sort,
+    tid,
+    date,
+    title,
+    deadline,
+    alertdate,
+    repeatdate
+  });
+  
+}
 
     //删除任务
     const del = (tid)=>{

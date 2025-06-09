@@ -6,6 +6,9 @@ import { onClickOutside } from '@vueuse/core'
 import selectDeadLine from './selectDeadLine.vue'
 //提醒我
 import selectAlertDate from './selectAlertDate.vue'
+//重复
+import selectRepeatDay from './selectRepeatDay.vue'
+
 import dayjs from "dayjs"
 
 const clearDate = ref(null)
@@ -38,19 +41,20 @@ const addTask = (e)=>{
         isOpenEdit.value = true
       if(e.key === 'Enter' && task.value){
         const tid = crypto.randomUUID()
-        mission = {
-            'sort':'myday',
-            'tid':tid,
-            'date':dayjs(),
-            'title':`${task.value}`,
-            'deadline':`${selectDay.value}`,
-            'alertdate':`${alertTime.value}`
-        }
+            mission = {
+                'sort': 'myday',
+                'tid': tid,
+                'date': dayjs().format('YYYY-MM-DD'), // 使用格式化日期
+                'title': task.value,
+                'deadline': selectDay.value || null, // 空值处理
+                'alertdate': alertTime.value || null, // 空值处理
+                'repeatdate': repeatTime.value || null // 空值处理
+            }
         clearDate.value = ''
         taskStore.addTask(mission)
         console.log("提交",taskStore.task)
         task.value = ''
-        selectDate.value = ''
+        // selectDate.value = ''
         resetAlert();
         isOpenEdit.value=false
      }
@@ -58,36 +62,19 @@ const addTask = (e)=>{
     
 }
 
-//显示时间
-// const alertRef = ref(null)
 const repeatRef = ref(null)
 
- //用于展示的截止日期
-const selectDate = ref(null)
  //截止日期
 const selectDay = ref(null)
 // 提醒日期
 const alertTime = ref(null)
+// 重复时间
+const repeatTime = ref(null)
 
-const toggleSelect = (num,e) => {
-  switch (isSelect.value) {
-    case num:
-      isSelect.value = -1 
-      break
-    default:
-      isSelect.value = num 
-      break
-  }
-}
-
-onClickOutside(repeatRef, () => {
-  if (isSelect.value === 3) isSelect.value = ''
-})
 
 //获取截止时间
-const getDeadLine = (val1) => {
-    selectDay.value = val1
-    // selectDate.value = val2
+const getDeadLine = (val) => {
+    selectDay.value = val
     console.log("截止日期",selectDay.value)
 }
 // 获取提醒时间
@@ -95,33 +82,30 @@ const getAlert = (val) => {
     alertTime.value = val
     console.log("提醒日期",alertTime.value)
 }
+// 获取重复时间
+const getRepeat = (val) => {
+    repeatTime.value = val
+     console.log("重复时间",repeatTime.value)
+}
 
 //清空时间
 const selectAlertDateRef = ref(null);
 const selectDeadlineRef = ref(null);
-
+const selectRepeatDateRef = ref(null)
 // 添加重置方法
 const resetAlert = () => {
+  selectRepeatDateRef.value?.resetRepeatData()
   selectAlertDateRef.value?.resetAlertData();
   selectDeadlineRef.value?.resetDeadlineData();
   alertTime.value = null;
-//   selectDate.value = null;
   selectDay.value = null;
+  repeatTime.value = null;
 };
-
 
 </script>
 
 <template>
   <div class="list" @click="openAdd">
-        <div class="selectRepeat" v-show="isSelect === 3" ref="repeatRef">
-            <div @click="select(1)"><div><i class="iconfont icon-meirirenwu"></i>每天</div></div>
-            <div @click="select(2)"><div><i class="iconfont icon-meizhou"></i>每周</div></div>
-            <div @click="select(3)"><div><i class="iconfont icon-meiyue"></i>每月</div></div>
-            <div @click="select(4)"><div><i class="iconfont icon-meinian"></i>每年</div></div>
-            <div><div><i class="iconfont icon-18"></i>自定义</div></div>
-            <div><div style="color:red"><i class="iconfont icon-a-shanchu1"></i>删除重复</div></div>
-        </div>
       <div class="addlist" v-show="isOpenInput">
         <i class="iconfont icon-jiahao"></i>
         <span>添加任务</span>
@@ -135,13 +119,7 @@ const resetAlert = () => {
             <!-- 提醒我 -->
             <div><selectAlertDate @getAlert = "getAlert" ref="selectAlertDateRef"></selectAlertDate></div>
             <!-- 重复 -->
-             <el-tooltip
-                placement="top"
-                 effect="light"
-            >
-            <template #content>重复<br />打开重复周期选取器以选择任务重复周期</template>
-           <div> <i class="iconfont icon-24gl-repeatDot" @click="toggleSelect(3)"></i><span></span></div>
-             </el-tooltip>
+            <div><selectRepeatDay @getRepeat = "getRepeat" ref="selectRepeatDateRef"></selectRepeatDay></div>
           </div>
       </div>
   </div>
@@ -155,45 +133,45 @@ const resetAlert = () => {
         width: 100%;
         position: relative;
          background: #f6f1eb;
-        .selectRepeat{
-            width: 180px;
-            height: 300px;
-            background: #f6f1eb;
-            position: absolute;
-             bottom: 50px;
-            color: #353535;
-            font-size: 15px;
-            border-radius: 5px;
-            .icon-jintian,.icon-mingtian,.icon-xiazhou{
-                margin-right: 5px;
-            }
-            .select{
-                margin-right: 10px;
-                color: #353535;
-            }
-            div{
-                height: 50px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 10px;
-                div{
-                    width: 100px;
-                    display: flex;
-                    justify-content: flex-start;
-                    .iconfont{
-                        margin-right: 20px;
-                    }
+        // .selectRepeat{
+        //     width: 180px;
+        //     height: 300px;
+        //     background: #f6f1eb;
+        //     position: absolute;
+        //      bottom: 50px;
+        //     color: #353535;
+        //     font-size: 15px;
+        //     border-radius: 5px;
+        //     .icon-jintian,.icon-mingtian,.icon-xiazhou{
+        //         margin-right: 5px;
+        //     }
+        //     .select{
+        //         margin-right: 10px;
+        //         color: #353535;
+        //     }
+        //     div{
+        //         height: 50px;
+        //         display: flex;
+        //         align-items: center;
+        //         justify-content: space-between;
+        //         padding: 0 10px;
+        //         div{
+        //             width: 100px;
+        //             display: flex;
+        //             justify-content: flex-start;
+        //             .iconfont{
+        //                 margin-right: 20px;
+        //             }
                     
-                }
-                  &:hover{
-                    background: #ffffff;
-                }
-            }
-            span{
-                color: #919191;
-            }
-         }
+        //         }
+        //           &:hover{
+        //             background: #ffffff;
+        //         }
+        //     }
+        //     span{
+        //         color: #919191;
+        //     }
+        //  }
          .addlist{
             margin-left: 20px;
             font-size: 16px;
@@ -237,7 +215,7 @@ const resetAlert = () => {
                     margin-right: 10px;
                 }
                 .iconfont{
-                   margin-right: 10px;
+                   margin-right: 15px;
                    &:hover{
                     cursor: pointer;
                     color: #353535;

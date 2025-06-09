@@ -10,6 +10,7 @@ import {
 import { useTaskStore } from "@/stores/taskStore";
 import dayjs from "dayjs";
 import "dayjs/locale/zh-cn";
+import selectRepeatDay from './selectRepeatDay.vue'
 dayjs.locale("zh-cn");
 //提醒时间
 import selectAlertDate from "./selectAlertDate.vue";
@@ -65,24 +66,41 @@ const useDeadLine = computed(() => {
     return "添加截止日期";
   }
   const dateObj = dayjs(deadline);
+  const currentYear = dayjs().year();
   if (!dateObj.isValid()) {
     return "添加截止日期";
   }
-  return dateObj.format("YYYY年MM月DD日HH点mm分")+' 截止';
+   if(dateObj.year() === currentYear){
+    return dateObj.format("MM月DD日HH点mm分")+' 截止';
+   }else{
+      return dateObj.format("YYYY年MM月DD日HH点mm分")+' 截止';
+   }
+ 
 });
 
 const useAlert = computed(() => {
   const alertTime = task.value.alertdate;
   if (!alertTime) return "提醒我";
-  if (typeof alertTime === "string" && alertTime.includes("Invalid Date")) {
-    return "提醒我";
-  }
   const dateObj = dayjs(alertTime);
   if (!dateObj.isValid()) {
     return "提醒我";
   }
-  return dateObj.format("YYYY年MM月DD日HH点mm分")+' 提醒我';
+  const currentYear = dayjs().year();
+  if(dateObj.year() === currentYear){
+    return dateObj.format("MM月DD日HH点mm分")+' 提醒我';
+  }else{
+    return dateObj.format("YYYY年MM月DD日HH点mm分")+' 提醒我';
+  }
 });
+
+const useRepeat = computed(()=>{
+  const repeatTime = task.value.repeatdate
+  if(repeatTime){
+    return repeatTime
+  }else{
+    return '重复'
+  }
+})
 
 //从我的一天中移除
 const delFromMyDay = (tid) => {
@@ -96,6 +114,7 @@ const createTime = computed(()=>{
   const dateObj = dayjs(date);
   return dateObj.format("M月D日")
 })
+
 </script>
 <template>
   <div class="drawer">
@@ -154,7 +173,18 @@ const createTime = computed(()=>{
         </span>
       </div>
       <div class="repeat">
-        <i class="iconfont icon-24gl-repeatDot"></i><span>重复</span>
+        <div>
+          <selectRepeatDay
+           positionX="-130pX"
+            :positionY="positionY"
+            :tid="task.tid"
+          >
+          </selectRepeatDay>
+        </div>
+        <span class="subrepeat"
+        
+        :class="{ active1: useRepeat !== '重复' }"
+        >{{useRepeat}}</span>
       </div>
     </div>
     <div class="delete">
@@ -237,6 +267,7 @@ const createTime = computed(()=>{
       margin: 0 auto;
     }
     .alert,
+    .repeat,
     .todate {
       cursor: default;
       display: flex;
@@ -261,19 +292,8 @@ const createTime = computed(()=>{
       span {
         margin-left: 15px;
       }
-    }
-    .repeat {
-      display: flex;
-      align-items: center;
-      cursor: default;
-      font-size: 15px;
-      color: #a4a4a4;
-      .iconfont {
-        margin-right: 10px;
-        margin-left: 15px;
-      }
-      &:hover {
-        background: rgb(253, 248, 248);
+      .subrepeat{
+        margin-left: 7px;
       }
     }
   }

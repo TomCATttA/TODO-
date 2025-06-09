@@ -14,6 +14,7 @@ const accountInfo = [
     }
 ]
 
+//登录接口
 Mock.mock(`${baseURL}/login`,'post',(userInfo)=>{
     const body =JSON.parse(userInfo.body) 
             //查找是否有满足条件的用户
@@ -45,4 +46,6 @@ Mock.mock(`${baseURL}/login`,'post',(userInfo)=>{
     }
    
 })
+
+//获取列表的内容
 

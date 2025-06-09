@@ -154,12 +154,14 @@ const confirmEvent = () => {
               v-if="element.type === '组'"
               @get-isFold="handleGroupFold"
             />
-            <MyList
-              :id="element.id"
-              :title="element.title"
-              :type="element.type"
-              v-if="element.type === '列表'"
-            />
+            <router-link :to="`/list/000/${element.id}`" class="router-link-style">
+              <MyList
+                :id="element.id"
+                :title="element.title"
+                :type="element.type"
+                v-if="element.type === '列表'"
+              />
+            </router-link>
             <VueDraggable
               v-model="element.childrenlist"
               v-if="element.type === '组'"
@@ -176,7 +178,7 @@ const confirmEvent = () => {
 v-for="subElement in element.childrenlist"
 :key="subElement.id"
 >
-
+ <router-link :to="`/list/${element.id}/${subElement.id}`"  class="router-link-style">
                 <MyList
                   :id="subElement.id"
                   :title="subElement.title"
@@ -185,7 +187,7 @@ v-for="subElement in element.childrenlist"
                   class="subTitem"
                   v-show="activeGroupId === element.id"
                 />
-
+</router-link>
               </div>
             </VueDraggable>
           </div>
@@ -393,5 +395,10 @@ v-for="subElement in element.childrenlist"
       }
     }
   }
+}
+.router-link-style {
+  display: block;
+  text-decoration: none;
+  color: inherit;
 }
 </style>

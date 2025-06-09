@@ -84,7 +84,7 @@ const clearSelectDay = () => {
   if (props.tid) {
     const task = taskStore.getTaskByTid(props.tid);
     task.deadline = null;
-    console.log("删除", task.deadline);
+    task.repeatdate = null;
   }
   selectDay.value = null;
   selectDate.value = null;
@@ -109,7 +109,6 @@ const resetDeadlineData = () => {
   selectDate.value = null;
 };
 
-// 添加 defineExpose
 defineExpose({
   resetDeadlineData,
 });
@@ -156,6 +155,7 @@ defineExpose({
 
 <style scoped lang="scss">
 .setDeadLine {
+  z-index: 99;
   position: relative;
 }
 .deadline {

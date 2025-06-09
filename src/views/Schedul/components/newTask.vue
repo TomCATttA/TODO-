@@ -11,16 +11,22 @@ const props = defineProps({
 const task = computed(() => taskStore.showTask(props.sort))
 onMounted(()=>{
    task.value = taskStore.showTask(props.sort)
-   console.log(task.value)
 })
+
 
 // 日期格式化函数
 const formatDate = (dateValue) => {
-  if (!dateValue) return ''
-  const dateObj = dayjs.isDayjs(dateValue) 
-    ? dateValue 
-    : dayjs(dateValue)
-  return dateObj.format('YYYY年M月D日')
+   if (!dateValue) return '';
+   const dateObj = dayjs(dateValue);
+   if (!dateObj.isValid()) {
+       return ''; 
+   }
+   const currentYear = dayjs().year();
+   if (dateObj.year() === currentYear) {
+       return dateObj.format('M月D日 , ddd');  
+   } else {
+       return dateObj.format('YYYY年M月D日 , ddd');  
+   }
 }
 
 const emit = defineEmits(['get-drawer'])
@@ -37,8 +43,9 @@ const isdrawer = (id)=>{
       <div class="title">
          <span class="subTitle">{{item.title}}</span>
          <div class="date">
-            <span v-show="item.deadline" class="deadline"><i class="iconfont icon-riqi"></i>  {{item.alertdate ?  formatDate(item.deadline) + '·' : formatDate(item.deadline)}} </span>
-            <span v-show="item.alertdate" class="alerttime"><i class="iconfont icon-naozhong"></i>{{ formatDate(item.alertdate)}} </span>
+            <span v-show="formatDate(item.deadline)" class="deadline"><i class="iconfont icon-riqi"></i>  {{item.alertdate ?  formatDate(item.deadline) + '·' : formatDate(item.deadline)}} </span>
+            <span v-show="formatDate(item.alertdate)" class="alerttime"><i class="iconfont icon-naozhong"></i>{{ formatDate(item.alertdate)}} </span>
+            <span v-show="item.repeatdate" class="repeattime"><i class="iconfont icon-xunhuan"></i></span>
          </div>
       </div>
       
@@ -89,6 +96,12 @@ const isdrawer = (id)=>{
                   color: rgb(50, 142, 255);
                    margin-left: 0;
                    margin-right: 5px;
+                  }
+               }
+               .repeattime{
+                  .icon-xunhuan{
+                     font-size: 14px;
+                     color: #aaaaaa;
                   }
                }
             }

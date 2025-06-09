@@ -43,15 +43,34 @@ export const useListStore = defineStore('list',()=>{
 };
 
     //根据id获取列表(组)名
-    const getTitle = (id,elId)=>{
-        const target = list.value.find(item => item.id === id)
-        if(!target){
-            const elTarget = list.value.find(item => item.id === elId)
-            const subTarget = elTarget.childrenlist.find(item => item.id === id)
-            return subTarget.title
-        }
-        return target.title
+    // const getTitle = (id,elId)=>{
+    //     const target = list.value.find(item => item.id === id)
+    //     if(!target){
+    //         const elTarget = list.value.find(item => item.id === elId)
+    //         const subTarget = elTarget.childrenlist.find(item => item.id === id)
+    //         return subTarget.title
+    //     }
+    //     return target.title
+    // }
+
+    const getTitle = (id, elId) => {
+    // 先在顶级列表中查找
+    const target = list.value.find(item => item.id === id);
+    if (target) {
+        return target.title;
     }
+    // 如果顶级列表没找到，并且提供了elId（组ID），则在组内查找
+    if (elId) {
+        const elTarget = list.value.find(item => item.id === elId);
+        if (elTarget && elTarget.childrenlist) {
+            const subTarget = elTarget.childrenlist.find(child => child.id === id);
+            if (subTarget) {
+                return subTarget.title;
+            }
+        }
+    }
+};
+
     //重命名列表
     const edit = (id, elId, newTitle) => {
   // 注意：必须先去掉自己的旧名字再去查是否重复
