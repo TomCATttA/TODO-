@@ -1,4 +1,5 @@
 import Mock from 'mockjs'
+
 const baseURL = 'http://todo-list.za.net'
 //定义登录的数据
 //伪造一个用户的数据
@@ -47,5 +48,4 @@ Mock.mock(`${baseURL}/login`,'post',(userInfo)=>{
    
 })
 
-//获取列表的内容
 

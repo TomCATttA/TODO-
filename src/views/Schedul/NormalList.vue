@@ -1,21 +1,28 @@
 <script setup>
 import addList from './components/addList.vue'
 import dayjs from 'dayjs'
-import {ref,onMounted} from 'vue'
+import {ref,onMounted, watch} from 'vue'
 import drawer from './components/drawer.vue'
 import 'dayjs/locale/zh-cn' 
 import newTask from './components/newTask.vue'
-import {useRoute,onBeforeRouteUpdate} from 'vue-router'
+import {useRoute} from 'vue-router'
+import {useListApi} from '@/apis/list'
 import {useListStore} from '@/stores/listStore'
+const listStore = useListStore()
 dayjs.locale('zh-cn') 
 const route = useRoute()
 const isdrawer = ref(false)
-const listStore = useListStore()
+const lid = ref(null)
+const gid = ref(null)
 //获取当前时间
 const currentDate = ref('')
 const taskId = ref()
-const lid = parseInt(route.params.subId)
-const gid = parseInt(route.params.id) 
+const title = ref(null)
+const getName = ()=>{
+    lid.value  = parseInt(route.params.subId)
+    gid.value = parseInt(route.params.id) 
+    title.value = listStore.getTitle(lid.value,gid.value)
+}
 const updateDate = () => {
   currentDate.value = dayjs()
     .format('M月DD日, dddd')
@@ -24,7 +31,12 @@ const useDrawer = (drawer,id)=>{
    isdrawer.value = drawer
    taskId.value = id
 }
+
+watch(route,()=>{
+    getName()
+})
 onMounted(() => {
+    getName()
   updateDate()
 })
 </script>
@@ -33,14 +45,14 @@ onMounted(() => {
   <div class="container">
    <div class="main-content" :style="{ width: isdrawer ? '700px' : '1000px' }">
       <div class="title">
-            <p class="section"></p>
+            <p class="section">{{title}}</p>
             <p class="date">{{currentDate}}</p>
          </div>
          <div class="tasklist">
-            <newTask sort="list" @get-drawer="useDrawer"></newTask>
+            <newTask :sort='`list${lid}`' @get-drawer="useDrawer"></newTask>
          </div>
          <div class="addlist">
-            <addList></addList>
+            <addList :sort='`list${lid}`'></addList>
          </div>
    </div>
    <div class="drawer" :style="{ width: isdrawer ? '350px' : '0px' }" v-if="isdrawer">

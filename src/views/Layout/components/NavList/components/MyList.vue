@@ -28,16 +28,8 @@ const delList = (id,elId,title) => {
   )
     .then(() => {
       listStore.del(id,elId)
-      // ElMessage({
-      //   type: 'success',
-      //   message: '删除成功',
-      // })
     })
     .catch(() => {
-      // ElMessage({
-      //   type: 'info',
-      //   message: '取消删除',
-      // })
     })
 }
 
@@ -69,14 +61,15 @@ const fontSize = computed(() => {
   if (len <= 10) return '14px'
   return '12px'
 })
+
 </script>
 <template>
   <div class="list">
     <div v-if="!isEdit" class="info">
       <i class="iconfont icon-liebiao-zu"></i>
       <p :style="{ fontSize: fontSize }">{{ title }}</p>
-      <i class="iconfont icon-zhongmingming" @click="openEdit(id,elId)"></i>
-      <i class="iconfont icon-quxiao" @click="delList(id,elId,title)"></i>
+      <i class="iconfont icon-zhongmingming" @click.stop="openEdit(id,elId)"></i>
+      <i class="iconfont icon-quxiao" @click.stop="delList(id,elId,title)"></i>
     </div>
     <div v-else class="infoInput">
       <i class="iconfont icon-liebiao-zu"></i>
@@ -93,6 +86,7 @@ const fontSize = computed(() => {
         height: 30px;
         font-size: 15px;
         position: relative;
+
         .info{
             display: flex;
             align-items: center;
@@ -161,5 +155,8 @@ const fontSize = computed(() => {
                 margin-top: 2px;
             }
         }
+    }
+            .isActive{
+      background: #e3e3e3;
     }
 </style>

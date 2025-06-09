@@ -34,6 +34,9 @@ const closeAdd = ()=>{
     }
 }
 
+const props = defineProps({
+    sort:String
+})
 //添加任务
 const addTask = (e)=>{
     let mission = null
@@ -42,7 +45,7 @@ const addTask = (e)=>{
       if(e.key === 'Enter' && task.value){
         const tid = crypto.randomUUID()
             mission = {
-                'sort': 'myday',
+                'sort': `${props.sort}`,
                 'tid': tid,
                 'date': dayjs().format('YYYY-MM-DD'), // 使用格式化日期
                 'title': task.value,

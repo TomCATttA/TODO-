@@ -3,6 +3,8 @@ import { ref, nextTick, reactive, onMounted, onBeforeMount } from "vue";
 import { useListStore } from "@/stores/listStore";
 import { VueDraggable } from "vue-draggable-plus";
 import {useUserStore} from "@/stores/userStore"
+import {useRoute} from 'vue-router'
+const route = useRoute()
 //导入列表业务
 import { useList } from "./composable/useList";
 // 使用列表相关的 composable
@@ -73,7 +75,11 @@ const handleGroupFold = (clickedId, shouldExpand) => {
   activeGroupId.value = shouldExpand ? clickedId : null
 }
 //登录情况验证
+const isSelect = ref(1)
 onBeforeMount(()=>{
+  if(route.params.id){
+    isSelect.value = 0
+  }
   //token不存在则跳到登录页面
   if(!userStore.userInfo.token){
     router.replace('/login')
@@ -84,6 +90,14 @@ onBeforeMount(()=>{
 const confirmEvent = () => {
    userStore.userInfo = ''
    router.replace('/login')
+}
+
+const select = (num)=>{
+    switch(num){
+      case num:
+        isSelect.value =num
+        break
+    }
 }
 </script>
 <template>
@@ -126,11 +140,11 @@ const confirmEvent = () => {
             </template>
           </el-input>
         </li>
-        <li><i class="iconfont icon-taiyang"></i>我的一天</li>
-        <li><i class="iconfont icon-shoucang"></i>重要</li>
-        <li><i class="iconfont icon-jihua"></i>计划内</li>
-        <li><i class="iconfont icon-yifenpei"></i>已分配给我</li>
-        <li><i class="iconfont icon-home"></i>任务</li>
+        <li @click="select(1)" :class="{active:isSelect === 1}"><router-link to='/' class="router-link-style"><i class="iconfont icon-taiyang"></i>我的一天</router-link></li>
+        <li @click="select(2)" :class="{active:isSelect === 2}"><i class="iconfont icon-shoucang"></i>重要</li>
+        <li @click="select(3)" :class="{active:isSelect === 3}"><i class="iconfont icon-jihua"></i>计划内</li>
+        <li @click="select(4)" :class="{active:isSelect === 4}"><i class="iconfont icon-yifenpei"></i>已分配给我</li>
+        <li @click="select(5)" :class="{active:isSelect === 5}"><i class="iconfont icon-home"></i>任务</li>
       </ul>
     </div>
 
@@ -160,6 +174,8 @@ const confirmEvent = () => {
                 :title="element.title"
                 :type="element.type"
                 v-if="element.type === '列表'"
+                :class="{active:isSelect === element.id}"
+                @click="select(element.id)"
               />
             </router-link>
             <VueDraggable
@@ -167,6 +183,7 @@ const confirmEvent = () => {
               v-if="element.type === '组'"
               :group="getGroupB"
               animation="1000"
+              
               @end="onDragEnd"
               @start="onStartDrop"
             >
@@ -185,6 +202,8 @@ v-for="subElement in element.childrenlist"
                   :type="subElement.type"
                   :el-id="element.id"
                   class="subTitem"
+                  @click="select(subElement.id)"
+                  :class="{active:isSelect === subElement.id}"
                   v-show="activeGroupId === element.id"
                 />
 </router-link>
@@ -400,5 +419,8 @@ v-for="subElement in element.childrenlist"
   display: block;
   text-decoration: none;
   color: inherit;
+}
+.active{
+  background: #e3e3e3;
 }
 </style>
